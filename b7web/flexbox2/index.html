@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DM Soluções Contábeis</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./assets/css/styles.css">
+        <script type="text/javascript">
+            window.onload = function() {
+                document.querySelector('.menuMobile').addEventListener('click', function() {
+                    document.querySelector(".menu nav ul").classList.toggle('active');
+                });
+                
+                // Fecha o menu ao redimensionar a tela para tamanho desktop
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 600) {
+                        document.querySelector(".menu nav ul").classList.remove('active');
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <header>
+            <div class="container">
+                <div class="logo">
+                    <a href=""><img src="./assets/img/logo_dm4.PNG" alt=""></a>
+                </div>
+                <div class="menu">
+                    <nav>
+                        <div class="menuMobile">
+                            <div class="mmline"></div>
+                            <div class="mmline"></div>
+                            <div class="mmline"></div>
+                        </div>
+                        <ul>
+                            <li class="active"><a href="#">Home</a></li>
+                            <li><a href="#">Sobre</a></li>
+                            <li><a href="#">Serviços</a></li>
+                            <li><a href="#">Contato</a></li>
+                        </ul>
+                    </nav>
+
+                </div>
+            </div> 
+        </header>
+        <section id="banner">
+            
+            <div class="container column">
+                <div class="banner_headline">
+                    <h1>DM Soluções Contábeis</h1>
+                    <p>Gerenciamento contábil com expertise e eficiência!</p>
+                </div>
+                <div class="banner_options">
+                    <div class="banner1">
+                        <div class="banner_title">
+                            Serviços
+                        </div>
+                        <div class="banner_text">
+                            <p>Oferecemos serviços contábeis completos para empresas de todos os portes.</p>
+                        </div>
+                        <a href="">Veja mais</a>
+                    </div>
+                    <div class="banner2">
+                        <div class="banner_title">
+                            Consultoria
+                        </div>
+                        <div class="banner_text">
+                            <p>Nossa equipe de especialistas está pronta para ajudar sua empresa a crescer.</p>
+                        </div>
+                        <a href="">Veja mais</a>
+                    </div>
+                    <div class="banner3">
+                        <div class="banner_title">
+                            Suporte
+                        </div>
+                        <div class="banner_text">
+                            <p>Oferecemos suporte contínuo para garantir que sua empresa esteja sempre em conformidade.</p>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </section>
+        <section id="geral">
+            <div class="container">
+                <section>
+                    <div class="widget">
+                        <div class="widget_title">
+                            <div class="widget_title_text">Últimas Notícias</div>
+                            <div class="widget_title_bar"></div>
+                        </div>
+                        <div class="widget_body flex">
+                            <article>
+                                <a href="">
+                                    <div class="news_data">
+                                        <div class="news_posted_at">15 JAN 26</div>
+                                        <div class="news_comments">2</div>
+                                    </div>
+                                    <div class="news_thumbnail">
+                                        <img src="assets/img/reforma_trib2.png" alt="reforma_tributaria">
+                                    </div>
+                                    <div class="news_title">
+                                        Reforma Tributária: O que muda para as empresas em 2026
+                                    </div>
+                                    <div class="news_text">
+                                        A reforma tributária aprovada em 2026 traz mudanças significativas para as empresas brasileiras. Neste artigo, exploramos as principais alterações e como elas impactam o setor empresarial.
+                                    </div>
+                                </a>
+                            </article>
+                            <article>
+                                <a href="">
+                                    <div class="news_data">
+                                        <div class="news_posted_at">15 JAN 26</div>
+                                        <div class="news_comments">2</div>
+                                    </div>
+                                    <div class="news_thumbnail">
+                                        <img src="assets/img/contabilidade_gestao_financeira.png" alt="reforma_tributaria">
+                                    </div>
+                                    <div class="news_title">
+                                        Como a contabilidade pode ajudar na gestão financeira da sua empresa
+                                    </div>
+                                    <div class="news_text">
+                                        A contabilidade desempenha um papel crucial na gestão financeira das empresas. Neste artigo, discutimos como uma boa prática contábil pode contribuir para o sucesso financeiro do seu negócio.
+                                    </div>
+                                </a>
+                            </article>
+                            <article>
+                                <a href="">
+                                    <div class="news_data">
+                                        <div class="news_posted_at">15 JAN 26</div>
+                                        <div class="news_comments">2</div>
+                                    </div>
+                                    <div class="news_thumbnail">
+                                        <img src="assets/img/dicas_fiscal.png" alt="reforma_tributaria">
+                                    </div>
+                                    <div class="news_title">
+                                        Dicas para manter sua empresa em conformidade fiscal
+                                    </div>
+                                    <div class="news_text">
+                                        Manter a conformidade fiscal é essencial para evitar problemas legais e financeiros. Neste artigo, oferecemos dicas práticas para garantir que sua empresa esteja sempre em dia com suas obrigações fiscais.
+                                    </div>
+                                </a>
+                            </article>
+                            <article>
+                                <a href="">
+                                    <div class="news_data">
+                                        <div class="news_posted_at">15 JAN 26</div>
+                                        <div class="news_comments">2</div>
+                                    </div>
+                                    <div class="news_thumbnail">
+                                        <img src="assets/img/contabilidade_digital.png" alt="reforma_tributaria">
+                                    </div>
+                                    <div class="news_title">
+                                        A importância da contabilidade digital no mundo moderno
+                                    </div>
+                                    <div class="news_text">
+                                        A contabilidade digital está revolucionando a forma como as empresas gerenciam suas finanças. Neste artigo, exploramos os benefícios da contabilidade digital e como ela pode melhorar a eficiência e a precisão dos processos contábeis.
+                                    </div>
+                                </a>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+                <aside>
+                    <div class="widget">
+                        <div class="widget_title">
+                            <div class="widget_title_text">Departamentos</div>
+                            <div class="widget_title_bar"></div>
+                        </div>
+                        <div class="widget_depts">                            
+                            <a href="">
+                                <div class="widget_dept_box">
+                                    <div class="widget_dept_text">
+                                        Contabilidade Internacional
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="">
+                                <div class="widget_dept_box">
+                                    <div class="widget_dept_text">
+                                        Contabilidade Financeira
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="">
+                                <div class="widget_dept_box">
+                                    <div class="widget_dept_text">
+                                        Contabilidade Gerencial
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="">
+                                <div class="widget_dept_box">
+                                    <div class="widget_dept_text">
+                                        Contabilidade de Custos
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="">
+                                <div class="widget_dept_box">
+                                    <div class="widget_dept_text">
+                                        Contabilidade Pública
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="">
+                                <div class="widget_dept_box">
+                                    <div class="widget_dept_text">
+                                        <div class="widget_dept_icon">  
+                                            Contabilidade Tributária    
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>                            
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget_title">
+                            <div class="widget_title_text">Links Úteis</div>
+                            <div class="widget_title_bar"></div>
+                        </div>
+                        <div class="widget_body">
+                            <div class="widget_links">
+                                <a href="#">Link 1</a>
+                                <div class="widget_link_bar"></div>                                
+                                <a href="#">Link 2</a>
+                                <div class="widget_link_bar"></div> 
+                                <a href="#">Link 3</a>
+                                <div class="widget_link_bar"></div> 
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+        <footer>
+            <div class="container flex_column">
+                <div class="footer_menu footer_title">
+                    <div class="fm1">
+                        Softwares
+                        <a href="">
+                            <p class="footer_text">Os aplicativos utilizados pela nossa Consultoria</p>
+                        </a>
+                    </div>
+                    <div class="fm2">
+                        Serviços
+                        <a href="">
+                            <p class="footer_text">Nossos serviços prestados</p>
+                        </a>                        
+                    </div>
+                    <div class="fm3">
+                        Contabilidade
+                        <a href="">
+                            <p class="footer_text">Contabilidade para empresas</p>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                <div class="footer_area">
+                    <div class="footer_areaitem">
+                        <div class="widget">
+                            <div class="footer_title">
+                                <div class="widget_title_text">Contato</div>
+                                <div class="widget_title_bar"></div>
+                            </div>
+                        </div>
+                        <div class="widget_footer_contato">
+                            <div class="c1">
+                                Nossa empresa está localizada na Rua Exemplo, 123, Centro, Cidade XYZ.
+                            </div>
+                            <div class="c2">
+                                Telefone: (11) 1234-5678<br>
+                                Email: contato@dmsolucoescontabeis.com.br
+                            </div>
+                            <div class="c3">
+                                Horário de Atendimento:<br>
+                                Segunda a Sexta: 9h às 18h<br>                                
+                            </div>
+                            <div class="c4">
+                                Siga-nos nas redes sociais:<br>
+                                <a href="#">Facebook</a> | <a href="#">LinkedIn</a> | <a href="#">Instagram</a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="footer_areaitem">
+                        <div class="widget">
+                            <div class="footer_title">
+                                <div class="widget_title_text">Últimos Posts</div>
+                                <div class="widget_title_bar"></div>
+                            </div>
+                        </div>
+                        <div class="footer_body_posts">
+                            <div class="footer_text">
+                                Reforma Tributária: O que muda para as empresas em 2026
+                            </div>
+                            <div class="footer_text">
+                                Como a contabilidade pode ajudar na gestão financeira da sua empresa
+                            </div>
+                            <div class="footer_text">
+                                Dicas para manter sua empresa em conformidade fiscal
+                            </div>
+                            <div class="footer_text">
+                                A importância da contabilidade digital no mundo moderno
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer_areaitem">
+                        <div class="widget">
+                            <div class="footer_title">
+                                <div class="widget_title_text">Últimas mensagens</div>
+                                <div class="widget_title_bar"></div>
+                            </div>
+                        </div>
+                        <div class="footer_body_msg">
+                            <div class="footer_text">
+                                Cliente X: "Excelente serviço!"
+                            </div>
+                            <div class="footer_text">
+                                Cliente Y: "Muito satisfeito com a consultoria."
+                            </div>
+                            <div class="footer_text">
+                                Cliente Z: "Recomendo a todos!"
+                            </div>
+                            <div class="footer_text">
+                                Cliente W: "Profissionais dedicados e competentes."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer_copy">
+                    &copy; 2024 DM Soluções Contábeis. Todos os direitos reservados.
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
