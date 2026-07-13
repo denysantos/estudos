@@ -1,0 +1,46 @@
+/*
+function formatEmail(email) {
+    let formattedEmail = email.trim().toLowerCase();
+    return formattedEmail;
+}
+
+
+let name = "John Doe";
+let age = 30;
+let isStudent = true;
+let firstName = "John";
+let lastName = "Doe";
+let email = "  JOHN.DOE@EXAMPLE.COM  ";
+let emailFormatted = formatEmail(email);
+
+//métodos de string
+console.log(name.length);
+console.log(name.toLowerCase());
+console.log(email.toLowerCase());
+console.log(emailFormatted.toLowerCase());
+
+console.log(formatEmail(email));
+*/
+
+
+/* 
+
+const phrase = "Ola, eu sou o " + firstName + " " + lastName + " e tenho " + age + " anos.";
+console.log(phrase);
+
+const fullName = `${firstName} ${lastName}`;
+const prhase2 = `Ola, eu sou o ${fullName} e tenho ${age} anos.`;
+console.log(prhase2);
+
+age = 31; // Updating the age variable
+
+console.log("Name:", name);
+console.log("Age:", age);
+console.log("Is Student:", isStudent);
+
+
+console.log("Hello, World!");
+console.error("Deu pau.");
+console.warn("This is a warning message.");
+
+ */
