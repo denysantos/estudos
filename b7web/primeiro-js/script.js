@@ -1,4 +1,31 @@
-//Formulas de matematica
+//******Formulas de matematica*****************
+
+//valor de procedimento na tabela cbhpm
+function valorProcedimento(codigo,edicao,deflator) {
+    let edicaoCbhpm = edicao;
+    let valorPorte = 0;
+    let qtUco = 11.5;
+    let valorFilme = 30.03;
+    let percDeflator = deflator;
+    let valorTotal = 0;
+    if (edicaoCbhpm === 2014) {
+        if (codigo === 10101012) {
+            valorPorte = 76.40;
+            valorFilme = 0;
+        } else if (codigo === 10101013) {
+            valorPorte = 100.90;
+        } 
+    }
+
+
+    valorTotal = (valorPorte + (qtUco * 10) + valorFilme) * percDeflator;
+    return valorTotal;
+}
+
+console.log("Valor do procedimento: R$" + valorProcedimento(10101012,2014,1).toFixed(2));
+
+
+
 
 //juros simples
 function jurosSimples(capital, taxa, tempo) {
