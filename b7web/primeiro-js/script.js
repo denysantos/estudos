@@ -1,3 +1,64 @@
+/**ARRAYS*************** */
+let lista = ["maça", "banana", "laranja", "uva"];
+
+//exemplo 1
+let q = 0;
+while (q < lista.length) {
+    console.log(lista[q]);
+    q++;
+}
+console.log("*****fim exemplo 1*****");
+
+//exemplo 2
+for (let i = 0; i < lista.length; i++) {
+    console.log(lista[i]);
+}
+console.log("*****fim exemplo 2*****");
+
+//exemplo 3
+function imprimirLista(lista) {
+    console.log(lista);
+}
+lista.forEach(imprimirLista);
+console.log("*****fim exemplo 3*****");
+
+//exemplo 4
+lista.forEach(function (item) {
+    console.log(item);
+});
+console.log("*****fim exemplo 4*****");
+console.log("**********");
+
+//exemplo 5
+lista.forEach((item) => {
+    console.log(item);
+});
+console.log("*****fim exemplo 5*****");
+console.log("**********");
+
+
+//exemplo 6
+if(lista.includes("jaca")) {
+    console.log("A lista contém jaca");
+} else {
+    console.log("A lista não contém jaca");
+};
+console.log("*****fim exemplo 6*****");
+
+//exemplo 7
+let fruta = lista.find((item) => {
+    if (item == 'banana') {
+        return true;
+    } else {
+        return false;
+    }
+});
+console.log("Fruta encontrada: " + fruta);
+console.log("*****fim exemplo 7*****");
+
+
+
+
 //******Formulas de matematica*****************
 
 //valor de procedimento na tabela cbhpm
