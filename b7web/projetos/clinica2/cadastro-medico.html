@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Médico</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu">
+        <h1>Cadastro de Médico</h1>
+        <form>
+            <label for="nome">Nome:</label><br>
+            <input type="text" id="nome" name="nome" required><br><br>
+
+            <label for="crm">CRM:</label><br>
+            <input type="text" id="crm" name="crm" required><br><br>
+
+            <label for="especialidade">Especialidade:</label><br>
+            <select id="especialidade" name="especialidade" required>
+                <option value="">Selecione</option>
+                <option value="clínica geral">Clínica Geral</option>
+                <option value="cardiologia">Cardiologia</option>
+                <option value="dermatologia">Dermatologia</option>
+                <option value="ginecologia">Ginecologia</option>
+                <option value="ortopedia">Ortopedia</option>
+                <option value="pediatria">Pediatria</option>
+            </select><br><br>
+
+            <label for="cpfcnpj">CPF/CNPJ:</label><br>
+            <input type="text" id="cpfcnpj" name="cpfcnpj" required><br><br>
+
+            <button class="btn" type="submit">Salvar</button>
+        </form>
+    </div>
+</body>
+</html>

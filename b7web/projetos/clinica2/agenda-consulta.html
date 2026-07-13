@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Consultas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu">
+        <h1>Agenda de Consultas</h1>
+        <form>
+            <label for="nomePaciente">Nome do Paciente:</label><br>
+            <input type="text" id="nomePaciente" name="nomePaciente" required><br><br>
+
+            <label for="dataHora">Data e Hora:</label><br>
+            <input type="datetime-local" id="dataHora" name="dataHora" required><br><br>
+
+            <label for="especialidade">Especialidade:</label><br>
+            <select id="especialidade" name="especialidade" required>
+                <option value="">Selecione</option>
+                <option value="clinica-geral">Clínica Geral</option>
+                <option value="cardiologia">Cardiologia</option>
+                <option value="dermatologia">Dermatologia</option>
+                <option value="ginecologia">Ginecologia</option>
+                <option value="ortopedia">Ortopedia</option>
+                <option value="pediatria">Pediatria</option>
+            </select><br><br>
+
+            <label for="medico">Médico:</label><br>
+            <input type="text" id="medico" name="medico" required><br><br>
+
+            <label for="convenio">Convênio:</label><br>
+            <select id="convenio" name="convenio" required>
+                <option value="">Selecione</option>
+                <option value="particular">Particular</option>
+                <option value="unimed">Unimed</option>
+                <option value="amil">Amil</option>
+                <option value="sulamerica">SulAmérica</option>
+                <option value="bradesco">Bradesco Saúde</option>
+            </select><br><br>
+
+            <label for="numeroCarteirinha">Número da Carteirinha do Convênio:</label><br>
+            <input type="text" id="numeroCarteirinha" name="numeroCarteirinha"><br><br>
+
+            <label for="planoConvenio">Plano do Convênio:</label><br>
+            <input type="text" id="planoConvenio" name="planoConvenio"><br><br>
+
+            <label for="disponibilidade">Disponibilidade da Agenda:</label><br>
+            <select id="disponibilidade" name="disponibilidade" required>
+                <option value="">Selecione</option>
+                <option value="disponivel">Disponível</option>
+                <option value="reservado">Reservado</option>
+                <option value="bloqueado">Bloqueado</option>
+            </select><br><br>
+
+            <button class="btn" type="submit">Salvar</button>
+        </form>
+    </div>
+</body>
+</html>

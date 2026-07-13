@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agendamento de Consulta - Clínica Médica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Agendamento de Consulta</h2>
+    <form id="formAgendamento">
+      <label>Nome do Paciente</label>
+      <input type="text" id="nome" placeholder="Digite o nome" required>
+
+      <label>CPF</label>
+      <input type="text" id="cpf" placeholder="Digite o CPF" required>
+
+      <label>Médico</label>
+      <select id="medico" required>
+        <option value="1">Dr. João - Cardiologista</option>
+        <option value="2">Dra. Maria - Ortopedista</option>
+        <option value="3">Dr. Pedro - Clínico Geral</option>
+      </select>
+
+      <label>Data e Hora</label>
+      <input type="datetime-local" id="dataHora" required>
+
+      <label>Tipo de Atendimento</label>
+      <select id="tipo">
+        <option value="Consulta">Consulta</option>
+        <option value="Exame">Exame</option>
+      </select>
+
+      <button type="submit">Agendar</button>
+    </form>
+    <div class="msg" id="mensagem"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
