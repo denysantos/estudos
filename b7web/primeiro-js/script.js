@@ -1,4 +1,43 @@
-/**ARRAYS*************** */
+/***************Arrays II: map e filter*************** */
+let lista = ['farinha', 'açúcar', 'fermento', 'ovo', 'leite', 'manteiga'];
+
+//exemplo 1 funcao map
+let lista2 = lista.map((item) => {
+    return item.toUpperCase();
+})
+
+console.log(lista);
+console.log(lista2);
+
+//exemplo 2 funcao filter
+let lista3 = lista.filter((item) => {
+    if (item.length > 5) {
+        return true;
+    } else {
+        return false;
+    }
+})
+
+console.log(lista3);
+
+//exemplo 3 - idem acima, mas simplificado (true ou false)
+let lista4 = lista.filter((item) => {
+    return item.length >= 5;
+})
+
+console.log(lista4);
+
+
+//exemplo 4 - idem acima, mas simplificado ainda mais (true ou false)
+let lista5 = lista.filter(item => item.length >= 3);
+
+console.log(lista5);
+
+
+
+
+/***************Arrays I: iteração e busca*************** */
+/*
 let lista = ["maça", "banana", "laranja", "uva"];
 
 //exemplo 1
@@ -158,7 +197,7 @@ console.log(calcImc(73, 1.73));
 
 
 
-/*
+
 function formatEmail(email) {
     let formattedEmail = email.trim().toLowerCase();
     return formattedEmail;
@@ -180,10 +219,10 @@ console.log(email.toLowerCase());
 console.log(emailFormatted.toLowerCase());
 
 console.log(formatEmail(email));
-*/
 
 
-/* 
+
+
 
 const phrase = "Ola, eu sou o " + firstName + " " + lastName + " e tenho " + age + " anos.";
 console.log(phrase);
