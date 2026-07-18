@@ -1,4 +1,37 @@
-/***************Arrays II: map e filter*************** */
+//==========================DOM document object model ==========================
+let titulo = document.getElementById("titulo");
+console.log(titulo);
+
+let titulo2 = document.querySelector("#titulo");
+console.log(titulo2);
+
+let lista = document.querySelectorAll("#lista li");
+console.log(lista);
+
+titulo.innerHTML = "Novo <italic>teste</italic> título";
+
+lista.forEach((item) => {
+    let texto = item.innerHTML;
+    item.innerHTML = texto.toUpperCase();
+});
+
+document.querySelector('h1');
+
+document.querySelectorAll('label');
+
+//pesquisa se o elemento h1 possui a classe grande (style.css)
+document.querySelector('h1').classList.contains('grande')
+
+document.querySelector('h1').classList.add('grande')
+
+document.querySelector('h1').classList.remove('grande')
+
+document.querySelector('h1').classList.toggle('grande')
+
+
+//==========================Arrays II: map e filter==============================
+
+/*
 let lista = ['farinha', 'açúcar', 'fermento', 'ovo', 'leite', 'manteiga'];
 
 //exemplo 1 funcao map
@@ -36,8 +69,7 @@ console.log(lista5);
 
 
 
-/***************Arrays I: iteração e busca*************** */
-/*
+//==========================Arrays I: iteração e busca============================== 
 let lista = ["maça", "banana", "laranja", "uva"];
 
 //exemplo 1
@@ -98,7 +130,7 @@ console.log("*****fim exemplo 7*****");
 
 
 
-//******Formulas de matematica*****************
+//==========================Formulas de matematica==============================
 
 //valor de procedimento na tabela cbhpm
 function valorProcedimento(codigo,edicao,deflator) {
