@@ -97,6 +97,14 @@ if ($method === 'PUT') {
         exit;
     }
 
+    if (isset($data['text']) || isset($data['title'])) {
+        $title = trim($data['text'] ?? $data['title']);
+        if (!empty($title)) {
+            $stmt = $pdo->prepare("UPDATE `tasks` SET title = ? WHERE id = ?");
+            $stmt->execute([$title, $id]);
+        }
+    }
+
     if (isset($data['columnId'])) {
         $columnId = (int)$data['columnId'];
         $completedAt = !empty($data['completedTimestamp']) ? date('Y-m-d H:i:s', floor($data['completedTimestamp'] / 1000)) : null;
