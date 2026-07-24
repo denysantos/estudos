@@ -75,6 +75,24 @@ try {
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        CREATE TABLE IF NOT EXISTS `users` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(100) NOT NULL,
+            `username` VARCHAR(50) NOT NULL UNIQUE,
+            `password` VARCHAR(255) NOT NULL,
+            `role` VARCHAR(20) NOT NULL DEFAULT 'user',
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+        CREATE TABLE IF NOT EXISTS `sla_goals` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `criticality` VARCHAR(20) NOT NULL UNIQUE,
+            `max_hours` INT NOT NULL DEFAULT 48,
+            `description` VARCHAR(255) NULL,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
 
 
@@ -99,6 +117,26 @@ try {
             (2, 'Em andamento', 0, 2),
             (3, 'Concluídas', 1, 3)");
     }
+
+    // 5. Garante usuário Administrador padrão
+    $stmtUser = $pdo->query("SELECT COUNT(*) AS total FROM `users` WHERE `username` = 'admin'");
+    $rowUser = $stmtUser->fetch();
+    if ((int)$rowUser['total'] === 0) {
+        $adminPassHash = password_hash('admin123', PASSWORD_DEFAULT);
+        $stmtIns = $pdo->prepare("INSERT INTO `users` (`name`, `username`, `password`, `role`) VALUES (?, ?, ?, ?)");
+        $stmtIns->execute(['Administrador', 'admin', $adminPassHash, 'admin']);
+    }
+
+    // 6. Garante Metas SLA padrão
+    $stmtSla = $pdo->query("SELECT COUNT(*) AS total FROM `sla_goals` ");
+    $rowSla = $stmtSla->fetch();
+    if ((int)$rowSla['total'] === 0) {
+        $pdo->exec("INSERT INTO `sla_goals` (`criticality`, `max_hours`, `description`) VALUES 
+            ('alta', 24, 'Prazo máximo para incidentes/tarefas de alta criticidade'),
+            ('normal', 48, 'Prazo padrão para incidentes/tarefas de criticidade normal'),
+            ('baixa', 72, 'Prazo estendido para tarefas de baixa criticidade')");
+    }
+
 
 } catch (PDOException $e) {
     http_response_code(500);

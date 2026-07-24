@@ -10,9 +10,18 @@ function formatDateTime($dateStr) {
 }
 
 if ($method === 'GET') {
+    // Buscar metas de SLA
+    $stmtSla = $pdo->query("SELECT criticality, max_hours FROM `sla_goals`");
+    $slaGoalsRaw = $stmtSla->fetchAll();
+    $slaGoals = [];
+    foreach ($slaGoalsRaw as $sg) {
+        $slaGoals[$sg['criticality']] = (int)$sg['max_hours'];
+    }
+
     $stmt = $pdo->query("SELECT * FROM `tasks` ORDER BY id ASC");
     $tasks = $stmt->fetchAll();
 
+    $now = time();
     $result = [];
     foreach ($tasks as $t) {
         $taskId = (int)$t['id'];
@@ -30,6 +39,17 @@ if ($method === 'GET') {
             ];
         }, $attachmentsRaw);
 
+        $crit = $t['criticality'] ?? 'normal';
+        $maxSlaHours = $slaGoals[$crit] ?? ($slaGoals['normal'] ?? 48);
+
+        $createdTs = strtotime($t['created_at']);
+        $completedTs = $t['completed_at'] ? strtotime($t['completed_at']) : null;
+        $endTs = $completedTs ? $completedTs : $now;
+
+        $elapsedSeconds = max(0, $endTs - $createdTs);
+        $elapsedHours = round($elapsedSeconds / 3600, 1);
+        $isWithinSla = $elapsedHours <= $maxSlaHours;
+
         $result[] = [
             'id' => $taskId,
             'text' => $t['title'],
@@ -38,19 +58,23 @@ if ($method === 'GET') {
             'attachments' => $attachments,
             'columnId' => (int)$t['column_id'],
             'complexity'  => $t['complexity']  ?? 'normal',
-            'criticality' => $t['criticality'] ?? 'normal',
+            'criticality' => $crit,
             'priority'    => $t['priority']    ?? 'normal',
-            'createdTimestamp' => strtotime($t['created_at']) * 1000,
-            'completedTimestamp' => $t['completed_at'] ? strtotime($t['completed_at']) * 1000 : null,
+            'createdTimestamp' => $createdTs * 1000,
+            'completedTimestamp' => $completedTs ? $completedTs * 1000 : null,
             'createdAt' => formatDateTime($t['created_at']),
             'completedAt' => formatDateTime($t['completed_at']),
-            'duration' => $t['duration'] ?? '-'
+            'duration' => $t['duration'] ?? '-',
+            'maxSlaHours' => $maxSlaHours,
+            'elapsedHours' => $elapsedHours,
+            'isWithinSla' => $isWithinSla
         ];
     }
 
     echo json_encode($result, JSON_UNESCAPED_UNICODE);
     exit;
 }
+
 
 $data = json_decode(file_get_contents('php://input'), true);
 
