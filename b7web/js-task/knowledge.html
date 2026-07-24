@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Conhecimento — Kanban</title>
+    <meta name="description" content="Base de conhecimento de incidentes com causa, análise e resolução.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Estilos adicionais exclusivos desta página */
+        .kb-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .kb-header-bar h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1b5e20;
+        }
+
+        .kb-search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+        }
+
+        .kb-search-icon {
+            position: absolute;
+            left: 10px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            color: #888;
+        }
+
+        #kb-search-input {
+            width: 100%;
+            padding: 9px 12px 9px 32px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #kb-search-input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46,125,50,0.12);
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>📚 Base de Conhecimento</h1>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">📋 Kanban</a>
+                <a href="knowledge.html" class="nav-link nav-link-active">📚 Base de Conhecimento</a>
+            </nav>
+        </header>
+
+        <!-- Barra de ações -->
+        <section class="card">
+            <div class="kb-header-bar">
+                <h2>📖 Artigos de Incidentes</h2>
+
+                <div class="kb-search-wrapper">
+                    <span class="kb-search-icon">🔍</span>
+                    <input type="text" id="kb-search-input" placeholder="Pesquisar artigos..." autocomplete="off">
+                </div>
+
+                <button id="btn-new-article" class="btn btn-primary">
+                    ✨ Novo Artigo
+                </button>
+            </div>
+        </section>
+
+        <!-- Grid de artigos -->
+        <main>
+            <div id="articles-grid" class="kb-grid"></div>
+        </main>
+    </div>
+
+    <!-- Modal de criação/edição/visualização -->
+    <div id="modal-overlay" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal">
+            <div class="modal-header">
+                <span id="modal-title" class="modal-title">Artigo</span>
+                <button id="modal-close" class="modal-close" title="Fechar">&times;</button>
+            </div>
+
+            <div id="modal-body" class="modal-body">
+                <!-- conteúdo injetado via JS -->
+            </div>
+
+            <div class="modal-footer">
+                <button id="btn-cancel" class="btn btn-secondary">Cancelar</button>
+                <button id="btn-save"   class="btn btn-primary">💾 Salvar Artigo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/knowledge.js"></script>
+</body>
+
+</html>

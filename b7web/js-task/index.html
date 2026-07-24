@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadro Kanban</title>
+    <meta name="description"
+        content="Quadro Kanban para gerenciamento de tarefas e incidentes com base de conhecimento integrada.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>Quadro Kanban</h1>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link nav-link-active">📋 Kanban</a>
+                <a href="knowledge.html" class="nav-link">📚 Base de Conhecimento</a>
+            </nav>
+        </header>
+
+        <!-- Dashboard de Métricas por Coluna -->
+        <section id="dashboard" class="dashboard card">
+            <h2 class="dashboard-title">📊 Dashboard de Tarefas</h2>
+            <div id="metrics-grid" class="metrics-grid"></div>
+        </section>
+
+        <!-- Barra Superior: Adicionar Tarefa, Busca e Adicionar Coluna -->
+        <section class="top-bar card">
+            <form id="task-form" class="task-form">
+                <div class="input-group">
+                    <input type="text" id="task-input" placeholder="Digite o título da nova tarefa..."
+                        autocomplete="off">
+                    <button type="submit" id="add-task-btn" class="btn btn-primary">
+                        + Adicionar Tarefa
+                    </button>
+                </div>
+            </form>
+
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Pesquisar por título ou descrição..."
+                    autocomplete="off">
+                <button class="search-clear" id="search-clear-btn" title="Limpar busca">✕</button>
+            </div>
+
+            <div class="column-actions">
+                <button id="add-column-btn" class="btn btn-secondary">
+                    + Nova Coluna
+                </button>
+            </div>
+        </section>
+
+        <!-- Container principal do Quadro Kanban -->
+        <main id="kanban-board" class="kanban-board"></main>
+    </div>
+
+    <!-- Modal de Visualização de Tarefa -->
+    <div id="task-modal-overlay" class="task-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+        <div class="task-modal">
+            <div class="task-modal-header">
+                <div class="task-modal-header-left">
+                    <span id="task-modal-id" class="task-modal-id-badge"></span>
+                    <h2 id="task-modal-title" class="task-modal-title"></h2>
+                </div>
+                <button id="task-modal-close" class="task-modal-close" title="Fechar">×</button>
+            </div>
+            <div id="task-modal-body" class="task-modal-body">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+
+</html>
