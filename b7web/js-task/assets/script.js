@@ -51,6 +51,10 @@ function escapeHtml(text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function escapeAttr(text) {
+    return String(text ?? '').replace(/"/g, '&quot;');
+}
+
 function highlightText(text, query) {
     if (!query) return escapeHtml(text);
     const escaped = escapeHtml(text);
@@ -337,12 +341,11 @@ function createTaskCard(task, query = '') {
 
     const editToggleBtn = document.createElement('button');
     editToggleBtn.className = 'task-card-edit-toggle';
-    editToggleBtn.textContent = isEditing ? '▲' : '✏️';
-    editToggleBtn.title = isEditing ? 'Fechar edição' : 'Editar tarefa';
+    editToggleBtn.textContent = '✏️';
+    editToggleBtn.title = 'Editar tarefa no modal';
     editToggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        task.isEditing = !task.isEditing;
-        renderBoard();
+        openEditTaskModal(task);
     });
 
     const deleteBtn = document.createElement('button');
@@ -458,11 +461,10 @@ function createTaskCard(task, query = '') {
 
     const editDescBtn = document.createElement('button');
     editDescBtn.className = 'btn-icon';
-    editDescBtn.textContent = task.isEditingDescription ? 'Cancelar' : '✏️ Editar';
+    editDescBtn.textContent = '✏️ Editar';
     editDescBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        task.isEditingDescription = !task.isEditingDescription;
-        renderBoard();
+        openEditTaskModal(task);
     });
 
     descHeader.appendChild(descTitle);
@@ -496,21 +498,20 @@ function createTaskCard(task, query = '') {
     } else {
         if (task.description && task.description.trim() !== '') {
             const descText = document.createElement('div');
-            descText.className = 'description-text';
+            descText.className = 'description-text has-html';
             if (query) {
                 descText.innerHTML = highlightText(task.description, query);
             } else {
-                descText.textContent = task.description;
+                descText.innerHTML = task.description;
             }
             descSection.appendChild(descText);
         } else {
             const emptyDesc = document.createElement('div');
             emptyDesc.className = 'description-empty';
-            emptyDesc.textContent = '+ Clique em Editar para adicionar os detalhes do incidente.';
+            emptyDesc.textContent = '+ Clique para adicionar os detalhes do incidente.';
             emptyDesc.addEventListener('click', (e) => {
                 e.stopPropagation();
-                task.isEditingDescription = true;
-                renderBoard();
+                openEditTaskModal(task);
             });
             descSection.appendChild(emptyDesc);
         }
@@ -830,18 +831,38 @@ async function removeTask(taskId) {
 }
 
 // ============================================================
-// 17. Modal de Visualização de Tarefa
+// 17. Modal de Visualização & Edição de Tarefa
 // ============================================================
 const taskModalOverlay = document.getElementById('task-modal-overlay');
 const taskModalIdBadge  = document.getElementById('task-modal-id');
 const taskModalTitleEl  = document.getElementById('task-modal-title');
 const taskModalBody     = document.getElementById('task-modal-body');
 const taskModalCloseBtn = document.getElementById('task-modal-close');
+const taskModalFooter   = document.getElementById('task-modal-footer');
+const taskModalCancelBtn = document.getElementById('task-modal-cancel');
+const taskModalSaveBtn   = document.getElementById('task-modal-save');
 
+let currentModalTask = null;
+
+// ── Modal de Visualização ──
 function openTaskModal(task) {
+    currentModalTask = task;
+    taskModalFooter.style.display = 'none';
     taskModalIdBadge.textContent = `#${task.id}`;
     taskModalTitleEl.textContent = task.text;
     taskModalBody.innerHTML = '';
+
+    // Barra de ação superior (botão editar)
+    const topActions = document.createElement('div');
+    topActions.style.display = 'flex';
+    topActions.style.justifyContent = 'flex-end';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-primary btn-sm';
+    editBtn.textContent = '✏️ Editar Tarefa';
+    editBtn.addEventListener('click', () => openEditTaskModal(task));
+    topActions.appendChild(editBtn);
+    taskModalBody.appendChild(topActions);
 
     // ── Badges ──
     const badgesSection = document.createElement('div');
@@ -872,8 +893,13 @@ function openTaskModal(task) {
     descLabel.className = 'task-modal-section-label';
     descLabel.textContent = '📋 Explicação do Incidente';
     const descContent = document.createElement('div');
-    descContent.className = 'task-modal-section-content' + (task.description && task.description.trim() ? '' : ' empty');
-    descContent.textContent = (task.description && task.description.trim()) ? task.description : 'Nenhuma descrição adicionada.';
+    const hasDesc = task.description && task.description.trim();
+    descContent.className = 'task-modal-section-content' + (hasDesc ? ' has-html' : ' empty');
+    if (hasDesc) {
+        descContent.innerHTML = task.description;
+    } else {
+        descContent.textContent = 'Nenhuma descrição adicionada.';
+    }
     descSection.appendChild(descLabel);
     descSection.appendChild(descContent);
     taskModalBody.appendChild(descSection);
@@ -938,6 +964,217 @@ function openTaskModal(task) {
     document.body.style.overflow = 'hidden';
 }
 
+// ── Modal de Edição de Tarefa ──
+function openEditTaskModal(task) {
+    currentModalTask = task;
+    taskModalIdBadge.textContent = `#${task.id}`;
+    taskModalTitleEl.textContent = `✏️ Editar Tarefa`;
+    taskModalBody.innerHTML = '';
+    taskModalFooter.style.display = 'flex';
+
+    // 1. Grupo de Título
+    const titleGroup = document.createElement('div');
+    titleGroup.className = 'form-group';
+    titleGroup.innerHTML = `
+        <label class="form-label">Título da Tarefa *</label>
+        <input type="text" id="edit-modal-task-title" class="form-input" value="${escapeAttr(task.text)}" placeholder="Título da tarefa...">
+    `;
+    taskModalBody.appendChild(titleGroup);
+
+    // 2. Grupo de Classificações
+    const classGroup = document.createElement('div');
+    classGroup.className = 'form-group';
+    classGroup.innerHTML = `
+        <label class="form-label">Classificação</label>
+        <div class="classification-grid">
+            <div class="classification-item">
+                <label class="classification-label">Complexidade</label>
+                <select id="edit-modal-complexity" class="classification-select">
+                    <option value="alta" ${task.complexity === 'alta' ? 'selected' : ''}>Alta</option>
+                    <option value="normal" ${!task.complexity || task.complexity === 'normal' ? 'selected' : ''}>Normal</option>
+                    <option value="baixa" ${task.complexity === 'baixa' ? 'selected' : ''}>Baixa</option>
+                </select>
+            </div>
+            <div class="classification-item">
+                <label class="classification-label">Criticidade</label>
+                <select id="edit-modal-criticality" class="classification-select">
+                    <option value="alta" ${task.criticality === 'alta' ? 'selected' : ''}>Alta</option>
+                    <option value="normal" ${!task.criticality || task.criticality === 'normal' ? 'selected' : ''}>Normal</option>
+                    <option value="baixa" ${task.criticality === 'baixa' ? 'selected' : ''}>Baixa</option>
+                </select>
+            </div>
+            <div class="classification-item">
+                <label class="classification-label">Prioridade</label>
+                <select id="edit-modal-priority" class="classification-select">
+                    <option value="alta" ${task.priority === 'alta' ? 'selected' : ''}>Alta</option>
+                    <option value="normal" ${!task.priority || task.priority === 'normal' ? 'selected' : ''}>Normal</option>
+                    <option value="baixa" ${task.priority === 'baixa' ? 'selected' : ''}>Baixa</option>
+                </select>
+            </div>
+        </div>
+    `;
+    taskModalBody.appendChild(classGroup);
+
+    // 3. Editor Rico para Descrição / Explicação do Incidente
+    const descGroup = document.createElement('div');
+    descGroup.className = 'form-group';
+    const descLabel = document.createElement('label');
+    descLabel.className = 'form-label';
+    descLabel.textContent = '📋 Explicação do Incidente (Editor Rico)';
+    descGroup.appendChild(descLabel);
+
+    const richEditor = createRichEditor('edit-modal-task-desc-rich', task.description || '', 'Digite aqui a explicação detalhada do incidente...');
+    descGroup.appendChild(richEditor);
+    taskModalBody.appendChild(descGroup);
+
+    // 4. Seção de Anexos
+    const attachGroup = document.createElement('div');
+    attachGroup.className = 'task-attachments-section';
+
+    const attachHeader = document.createElement('div');
+    attachHeader.className = 'attachments-header';
+    attachHeader.innerHTML = `<span>📎 Anexos (${task.attachments ? task.attachments.length : 0})</span>`;
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    fileInput.style.display = 'none';
+
+    const addAttachBtn = document.createElement('button');
+    addAttachBtn.type = 'button';
+    addAttachBtn.className = 'btn-icon';
+    addAttachBtn.textContent = '+ Anexar';
+    addAttachBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+            await uploadAttachments(task.id, e.target.files);
+            openEditTaskModal(task);
+        }
+    });
+
+    attachHeader.appendChild(addAttachBtn);
+    attachGroup.appendChild(attachHeader);
+    attachGroup.appendChild(fileInput);
+
+    if (task.attachments && task.attachments.length > 0) {
+        const attachList = document.createElement('div');
+        attachList.className = 'attachment-list';
+        task.attachments.forEach(att => {
+            const item = document.createElement('div');
+            item.className = 'attachment-item';
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'attachment-info';
+            infoDiv.innerHTML = `<span class="attachment-name">📄 ${escapeHtml(att.name)}</span><span class="attachment-size">(${att.size})</span>`;
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'attachment-actions';
+
+            const openLink = document.createElement('a');
+            openLink.className = 'attachment-link';
+            openLink.textContent = 'Abrir';
+            openLink.href = att.url;
+            openLink.target = '_blank';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'attachment-remove';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.title = 'Remover anexo';
+            removeBtn.addEventListener('click', async () => {
+                await removeAttachment(task.id, att.id);
+                openEditTaskModal(task);
+            });
+
+            actionsDiv.appendChild(openLink);
+            actionsDiv.appendChild(removeBtn);
+            item.appendChild(infoDiv);
+            item.appendChild(actionsDiv);
+            attachList.appendChild(item);
+        });
+        attachGroup.appendChild(attachList);
+    }
+    taskModalBody.appendChild(attachGroup);
+
+    taskModalOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Foca no input de título
+    setTimeout(() => {
+        const titleInput = document.getElementById('edit-modal-task-title');
+        if (titleInput) titleInput.focus();
+    }, 50);
+}
+
+// ── Salvar Alterações da Tarefa ──
+if (taskModalSaveBtn) {
+    taskModalSaveBtn.addEventListener('click', async () => {
+        if (!currentModalTask) return;
+
+        const titleInput = document.getElementById('edit-modal-task-title');
+        const complexitySel = document.getElementById('edit-modal-complexity');
+        const criticalitySel = document.getElementById('edit-modal-criticality');
+        const prioritySel = document.getElementById('edit-modal-priority');
+        const descEditorEl = document.getElementById('edit-modal-task-desc-rich');
+
+        if (!titleInput) return;
+
+        const title = titleInput.value.trim();
+        if (!title) {
+            titleInput.style.borderColor = '#c62828';
+            titleInput.focus();
+            return;
+        }
+
+        const complexity = complexitySel ? complexitySel.value : 'normal';
+        const criticality = criticalitySel ? criticalitySel.value : 'normal';
+        const priority = prioritySel ? prioritySel.value : 'normal';
+        const description = descEditorEl ? descEditorEl.innerHTML.trim() : '';
+
+        taskModalSaveBtn.disabled = true;
+        taskModalSaveBtn.textContent = '⏳ Salvando...';
+
+        try {
+            const res = await fetch(`${API_BASE}/tasks.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: currentModalTask.id,
+                    text: title,
+                    description: description,
+                    complexity: complexity,
+                    criticality: criticality,
+                    priority: priority
+                })
+            });
+
+            if (res.ok) {
+                currentModalTask.text = title;
+                currentModalTask.description = description;
+                currentModalTask.complexity = complexity;
+                currentModalTask.criticality = criticality;
+                currentModalTask.priority = priority;
+
+                renderBoard();
+                closeTaskModal();
+            } else {
+                alert('Erro ao salvar alterações da tarefa.');
+            }
+        } catch (err) {
+            console.error('Erro ao salvar tarefa:', err);
+            alert('Erro ao salvar alterações da tarefa.');
+        } finally {
+            taskModalSaveBtn.disabled = false;
+            taskModalSaveBtn.textContent = '💾 Salvar Alterações';
+        }
+    });
+}
+
+if (taskModalCancelBtn) {
+    taskModalCancelBtn.addEventListener('click', closeTaskModal);
+}
+
 function createModalDivider() {
     const hr = document.createElement('hr');
     hr.className = 'task-modal-divider';
@@ -952,6 +1189,136 @@ function closeTaskModal() {
 taskModalCloseBtn.addEventListener('click', closeTaskModal);
 taskModalOverlay.addEventListener('click', (e) => { if (e.target === taskModalOverlay) closeTaskModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeTaskModal(); });
+
+// ============================================================
+// Rich Text Editor Helper
+// ============================================================
+function createRichEditor(editorId, initialHtml, placeholder) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'rich-editor-wrapper';
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'rich-toolbar';
+
+    let savedSelection = null;
+    function saveSelection() {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+            savedSelection = sel.getRangeAt(0).cloneRange();
+        }
+    }
+    function restoreSelection() {
+        if (!savedSelection) return;
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedSelection);
+    }
+
+    const tools = [
+        { label: 'B',  title: 'Negrito',         cmd: () => execCmd('bold'),   style: 'font-weight:700;' },
+        { label: 'I',  title: 'Itálico',         cmd: () => execCmd('italic'), style: 'font-style:italic;' },
+        { label: 'U',  title: 'Sublinhado',       cmd: () => execCmd('underline'), style: 'text-decoration:underline;' },
+        null,
+        { label: '`code`',     title: 'Código inline',   cmd: insertInlineCode, extra: 'code-btn' },
+        { label: '\u25a4 Bloco', title: 'Bloco de código', cmd: insertCodeBlock,  extra: 'code-btn' },
+    ];
+
+    function execCmd(cmd) {
+        restoreSelection();
+        document.execCommand(cmd, false, null);
+        content.focus();
+        updateActiveStates();
+    }
+
+    function insertInlineCode() {
+        restoreSelection();
+        const sel = window.getSelection();
+        const selectedText = sel && !sel.isCollapsed ? sel.toString() : 'code';
+        const code = document.createElement('code');
+        code.textContent = selectedText;
+        if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(code);
+            range.setStartAfter(code);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+        content.focus();
+    }
+
+    function insertCodeBlock() {
+        restoreSelection();
+        const sel = window.getSelection();
+        const selectedText = sel && !sel.isCollapsed ? sel.toString() : 'Seu código aqui...';
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        code.textContent = selectedText;
+        pre.appendChild(code);
+        if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(pre);
+            range.setStartAfter(pre);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } else {
+            content.appendChild(pre);
+        }
+        content.focus();
+    }
+
+    function updateActiveStates() {
+        toolBtns.forEach((btn, i) => {
+            const tool = tools.filter(t => t !== null)[i];
+            if (!tool || tool.extra === 'code-btn') return;
+            const cmdMap = { 'B': 'bold', 'I': 'italic', 'U': 'underline' };
+            const cmd = cmdMap[tool.label];
+            if (cmd) btn.classList.toggle('active', document.queryCommandState(cmd));
+        });
+    }
+
+    const toolBtns = [];
+    tools.forEach(tool => {
+        if (tool === null) {
+            const sep = document.createElement('span');
+            sep.className = 'rich-toolbar-separator';
+            toolbar.appendChild(sep);
+            return;
+        }
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'rich-toolbar-btn' + (tool.extra ? ` ${tool.extra}` : '');
+        btn.textContent = tool.label;
+        btn.title = tool.title;
+        if (tool.style) btn.setAttribute('style', tool.style);
+        btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            saveSelection();
+            tool.cmd();
+        });
+        toolbar.appendChild(btn);
+        toolBtns.push(btn);
+    });
+
+    const content = document.createElement('div');
+    content.className = 'rich-content';
+    content.contentEditable = 'true';
+    content.id = editorId;
+    content.setAttribute('data-placeholder', placeholder || 'Digite aqui...');
+    if (initialHtml) content.innerHTML = initialHtml;
+
+    content.addEventListener('keyup', updateActiveStates);
+    content.addEventListener('mouseup', updateActiveStates);
+    content.addEventListener('selectionchange', updateActiveStates);
+    content.addEventListener('blur', saveSelection);
+
+    wrapper.appendChild(toolbar);
+    wrapper.appendChild(content);
+    return wrapper;
+}
 
 // ============================================================
 // 18. Adicionar Coluna
