@@ -83,13 +83,18 @@
                     <input type="text" id="kb-search-input" placeholder="Pesquisar artigos..." autocomplete="off">
                 </div>
 
+                <div class="view-toggle-group">
+                    <button id="btn-view-cards" class="view-toggle-btn active" title="Visualização em Cards">🟇 Cards</button>
+                    <button id="btn-view-list" class="view-toggle-btn" title="Visualização em Lista/Tabela">☰ Lista</button>
+                </div>
+
                 <button id="btn-new-article" class="btn btn-primary">
                     ✨ Novo Artigo
                 </button>
             </div>
         </section>
 
-        <!-- Grid de artigos -->
+        <!-- Container de exibição dos artigos (Grid ou Tabela) -->
         <main>
             <div id="articles-grid" class="kb-grid"></div>
         </main>
