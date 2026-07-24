@@ -30,12 +30,14 @@ CREATE TABLE IF NOT EXISTS `tasks` (
 -- 3. Tabela de Anexos
 CREATE TABLE IF NOT EXISTS `attachments` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `task_id` INT NOT NULL,
+  `task_id` INT NULL,
+  `knowledge_id` INT NULL,
   `file_name` VARCHAR(255) NOT NULL,
   `file_path` VARCHAR(500) NOT NULL,
   `file_size` VARCHAR(50) NOT NULL,
   `uploaded_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`knowledge_id`) REFERENCES `knowledge_base`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Inserção de colunas padrão se a tabela estiver vazia
