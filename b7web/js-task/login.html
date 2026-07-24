@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Quadro Kanban</title>
+    <meta name="description" content="Página de login do sistema Kanban com suporte a administradores e usuários.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body class="login-body">
+    <div class="login-container card">
+        <div class="login-header">
+            <div class="login-logo-icon">📋</div>
+            <h1>Sistema Kanban</h1>
+            <p>Acesse sua conta para gerenciar tarefas e incidentes</p>
+        </div>
+
+        <div id="login-error" class="login-error-msg" style="display: none;"></div>
+
+        <form id="login-form" class="login-form">
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <input type="text" id="username" name="username" placeholder="Digite seu nome de usuário" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" id="btn-submit-login" class="btn btn-primary btn-block">
+                🔑 Entrar no Sistema
+            </button>
+        </form>
+
+        <div class="login-default-credentials">
+            <div class="credentials-badge-title">💡 Acesso Inicial Padrão</div>
+            <p><strong>Usuário:</strong> <code>admin</code></p>
+            <p><strong>Senha:</strong> <code>admin123</code></p>
+            <span class="credentials-hint">(O Administrador pode criar novos usuários na página de Administração)</span>
+        </div>
+    </div>
+
+    <script src="assets/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const errorMsg = document.getElementById('login-error');
+            const submitBtn = document.getElementById('btn-submit-login');
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorMsg.style.display = 'none';
+
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                if (!username || !password) return;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Autenticando...';
+
+                try {
+                    await window.Auth.login(username, password);
+                } catch (err) {
+                    errorMsg.textContent = err.message || 'Falha ao autenticar. Verifique seus dados.';
+                    errorMsg.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '🔑 Entrar no Sistema';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

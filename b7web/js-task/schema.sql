@@ -60,3 +60,43 @@ CREATE TABLE IF NOT EXISTS `knowledge_base` (
   FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 5. Tabela de Usuários
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `role` VARCHAR(20) NOT NULL DEFAULT 'user',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Tabela de Metas de SLA
+CREATE TABLE IF NOT EXISTS `sla_goals` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `criticality` VARCHAR(20) NOT NULL UNIQUE,
+  `max_hours` INT NOT NULL DEFAULT 48,
+  `description` VARCHAR(255) NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Inserção de usuário administrador padrão (Senha: admin123)
+-- Hash gerado por password_hash('admin123', PASSWORD_DEFAULT)
+INSERT INTO `users` (`id`, `name`, `username`, `password`, `role`)
+SELECT 1, 'Administrador', 'admin', '$2y$10$e.w2pQ5oXf7sB2W5X3kZ7e/1D8vY6eT9K7qZ7v2v9/W3jY9e2K7qZ', 'admin'
+WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `username` = 'admin');
+
+-- Inserção de metas SLA padrão por criticidade
+INSERT INTO `sla_goals` (`criticality`, `max_hours`, `description`)
+SELECT 'alta', 24, 'Prazo máximo para incidentes/tarefas de alta criticidade'
+WHERE NOT EXISTS (SELECT 1 FROM `sla_goals` WHERE `criticality` = 'alta');
+
+INSERT INTO `sla_goals` (`criticality`, `max_hours`, `description`)
+SELECT 'normal', 48, 'Prazo padrão para incidentes/tarefas de criticidade normal'
+WHERE NOT EXISTS (SELECT 1 FROM `sla_goals` WHERE `criticality` = 'normal');
+
+INSERT INTO `sla_goals` (`criticality`, `max_hours`, `description`)
+SELECT 'baixa', 72, 'Prazo estendido para tarefas de baixa criticidade'
+WHERE NOT EXISTS (SELECT 1 FROM `sla_goals` WHERE `criticality` = 'baixa');
+
+

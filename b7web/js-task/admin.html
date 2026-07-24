@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração — Kanban</title>
+    <meta name="description" content="Painel de administração para gestão de usuários, definição de metas de SLA e relatórios comparativos.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>⚙️ Painel de Administração</h1>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">📋 Kanban</a>
+                <a href="knowledge.html" class="nav-link">📚 Base de Conhecimento</a>
+            </nav>
+        </header>
+
+        <!-- Navegação por Abas do Administrador -->
+        <nav class="admin-tabs">
+            <button class="tab-btn active" data-tab="tab-users">👥 Gestão de Usuários</button>
+            <button class="tab-btn" data-tab="tab-slas">🎯 Definição de Metas (SLAs)</button>
+            <button class="tab-btn" data-tab="tab-report">📊 Comparativo de Metas & SLAs</button>
+        </nav>
+
+        <!-- ABA 1: Gestão de Usuários -->
+        <section id="tab-users" class="tab-content active">
+            <div class="admin-grid-layout">
+                <!-- Formulário de Cadastro de Usuário -->
+                <div class="card">
+                    <h2 class="admin-section-title">✨ Cadastrar Novo Usuário</h2>
+                    <div id="user-form-alert" class="alert-box" style="display: none;"></div>
+
+                    <form id="create-user-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="new-user-name">Nome Completo</label>
+                            <input type="text" id="new-user-name" placeholder="Ex: Maria Silva" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-username">Nome de Usuário (Login)</label>
+                            <input type="text" id="new-username" placeholder="Ex: mariasilva" required autocomplete="username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-password">Senha</label>
+                            <input type="password" id="new-password" placeholder="Digite uma senha segura" required autocomplete="new-password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-user-role">Perfil de Acesso</label>
+                            <select id="new-user-role">
+                                <option value="user">Usuário Comum</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">➕ Cadastrar Usuário</button>
+                    </form>
+                </div>
+
+                <!-- Lista de Usuários Cadastrados -->
+                <div class="card">
+                    <h2 class="admin-section-title">📋 Usuários Cadastrados</h2>
+                    <div class="table-responsive">
+                        <table class="admin-table" id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Usuário</th>
+                                    <th>Perfil</th>
+                                    <th>Data Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <tr><td colspan="6" class="text-center">Carregando usuários...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: Definição de Metas (SLAs) -->
+        <section id="tab-slas" class="tab-content">
+            <div class="card max-width-800 center-block">
+                <h2 class="admin-section-title">🎯 Configurar Metas de SLA por Criticidade</h2>
+                <p class="section-subtitle">Defina o prazo limite em horas entre a <strong>data de criação</strong> e a <strong>data de encerramento</strong> de cada tarefa.</p>
+
+                <div id="sla-form-alert" class="alert-box" style="display: none;"></div>
+
+                <form id="sla-goals-form" class="admin-form">
+                    <div class="sla-input-card criticality-alta">
+                        <div class="sla-input-info">
+                            <span class="crit-badge crit-alta">Alta Criticidade</span>
+                            <span class="crit-desc">Meta de atendimento prioritário e resolução urgente</span>
+                        </div>
+                        <div class="sla-hours-input-wrapper">
+                            <input type="number" id="sla-hours-alta" min="1" max="1000" required>
+                            <span class="unit">Horas</span>
+                        </div>
+                    </div>
+
+                    <div class="sla-input-card criticality-normal">
+                        <div class="sla-input-info">
+                            <span class="crit-badge crit-normal">Normal Criticidade</span>
+                            <span class="crit-desc">Prazo padrão de atendimento para demandas regulares</span>
+                        </div>
+                        <div class="sla-hours-input-wrapper">
+                            <input type="number" id="sla-hours-normal" min="1" max="1000" required>
+                            <span class="unit">Horas</span>
+                        </div>
+                    </div>
+
+                    <div class="sla-input-card criticality-baixa">
+                        <div class="sla-input-info">
+                            <span class="crit-badge crit-baixa">Baixa Criticidade</span>
+                            <span class="crit-desc">Prazo flexível para tarefas de baixa urgência</span>
+                        </div>
+                        <div class="sla-hours-input-wrapper">
+                            <input type="number" id="sla-hours-baixa" min="1" max="1000" required>
+                            <span class="unit">Horas</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block mt-20">💾 Salvar Metas de SLA</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ABA 3: Comparativo de Metas & SLAs -->
+        <section id="tab-report" class="tab-content">
+            <!-- Cards de Métricas e Performance de SLAs -->
+            <div class="metrics-grid mb-20" id="sla-metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-icon">🏁</span>
+                    <div class="metric-info">
+                        <span class="metric-label">Total Concluídas</span>
+                        <span class="metric-value" id="metric-total-completed">0</span>
+                    </div>
+                </div>
+
+                <div class="metric-card metric-success">
+                    <span class="metric-icon">🟢</span>
+                    <div class="metric-info">
+                        <span class="metric-label">Dentro da Meta</span>
+                        <span class="metric-value" id="metric-completed-met">0</span>
+                    </div>
+                </div>
+
+                <div class="metric-card metric-danger">
+                    <span class="metric-icon">🔴</span>
+                    <div class="metric-info">
+                        <span class="metric-label">SLA Estourado</span>
+                        <span class="metric-value" id="metric-completed-breached">0</span>
+                    </div>
+                </div>
+
+                <div class="metric-card metric-rate">
+                    <span class="metric-icon">📈</span>
+                    <div class="metric-info">
+                        <span class="metric-label">Taxa de Cumprimento</span>
+                        <span class="metric-value" id="metric-compliance-rate">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela Detalhada do Comparativo por Tarefa -->
+            <div class="card">
+                <h2 class="admin-section-title">📊 Relatório Comparativo: Criação x Encerramento</h2>
+                <div class="table-responsive">
+                    <table class="admin-table" id="report-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tarefa</th>
+                                <th>Criticidade</th>
+                                <th>Data Criação</th>
+                                <th>Data Encerramento</th>
+                                <th>Tempo Decorrido</th>
+                                <th>Meta Estipulada</th>
+                                <th>Status da Meta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body">
+                            <tr><td colspan="8" class="text-center">Carregando relatório...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="assets/auth.js"></script>
+    <script src="assets/admin.js"></script>
+</body>
+
+</html>
