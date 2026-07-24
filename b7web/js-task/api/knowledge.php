@@ -27,16 +27,31 @@ if ($method === 'GET') {
     }
 
     $rows = $stmt->fetchAll();
-    $result = array_map(function($row) {
+
+    // Carregar anexos de todos os artigos da base de conhecimento
+    $attStmt = $pdo->query("SELECT * FROM `attachments` WHERE knowledge_id IS NOT NULL ORDER BY id ASC");
+    $allAtts = $attStmt->fetchAll();
+    $attsByKb = [];
+    foreach ($allAtts as $att) {
+        $attsByKb[$att['knowledge_id']][] = [
+            'id'   => (int)$att['id'],
+            'name' => $att['file_name'],
+            'size' => $att['file_size'],
+            'url'  => $att['file_path']
+        ];
+    }
+
+    $result = array_map(function($row) use ($attsByKb) {
         return [
-            'id'         => (int)$row['id'],
-            'taskId'     => $row['task_id'] ? (int)$row['task_id'] : null,
-            'taskTitle'  => $row['task_title'] ?? null,
-            'title'      => $row['title'],
-            'cause'      => $row['cause'] ?? '',
-            'analysis'   => $row['analysis'] ?? '',
-            'resolution' => $row['resolution'] ?? '',
-            'createdAt'  => (new DateTime($row['created_at']))->format('d/m/Y H:i')
+            'id'          => (int)$row['id'],
+            'taskId'      => $row['task_id'] ? (int)$row['task_id'] : null,
+            'taskTitle'   => $row['task_title'] ?? null,
+            'title'       => $row['title'],
+            'cause'       => $row['cause'] ?? '',
+            'analysis'    => $row['analysis'] ?? '',
+            'resolution'  => $row['resolution'] ?? '',
+            'attachments' => $attsByKb[$row['id']] ?? [],
+            'createdAt'   => (new DateTime($row['created_at']))->format('d/m/Y H:i')
         ];
     }, $rows);
 
@@ -74,14 +89,15 @@ if ($method === 'POST') {
     }
 
     echo json_encode([
-        'id'         => $newId,
-        'taskId'     => $taskId,
-        'taskTitle'  => $taskTitle,
-        'title'      => $title,
-        'cause'      => $cause,
-        'analysis'   => $analysis,
-        'resolution' => $resolution,
-        'createdAt'  => date('d/m/Y H:i')
+        'id'          => $newId,
+        'taskId'      => $taskId,
+        'taskTitle'   => $taskTitle,
+        'title'       => $title,
+        'cause'       => $cause,
+        'analysis'    => $analysis,
+        'resolution'  => $resolution,
+        'attachments' => [],
+        'createdAt'   => date('d/m/Y H:i')
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -114,6 +130,20 @@ if ($method === 'DELETE') {
         echo json_encode(['error' => 'ID é obrigatório']);
         exit;
     }
+
+    // Deletar arquivos físicos dos anexos associados
+    $stmtAtt = $pdo->prepare("SELECT file_path FROM `attachments` WHERE knowledge_id = ?");
+    $stmtAtt->execute([$id]);
+    $atts = $stmtAtt->fetchAll();
+    foreach ($atts as $att) {
+        $localPath = __DIR__ . '/../' . ltrim($att['file_path'], '/');
+        if (file_exists($localPath)) {
+            @unlink($localPath);
+        }
+    }
+    $stmtDelAtt = $pdo->prepare("DELETE FROM `attachments` WHERE knowledge_id = ?");
+    $stmtDelAtt->execute([$id]);
+
     $stmt = $pdo->prepare("DELETE FROM `knowledge_base` WHERE id = ?");
     $stmt->execute([$id]);
     echo json_encode(['success' => true]);

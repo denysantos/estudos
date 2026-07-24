@@ -8,12 +8,43 @@ if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-if ($method === 'POST') {
-    $taskId = (int)($_POST['taskId'] ?? 0);
+if ($method === 'GET') {
+    $knowledgeId = (int)($_GET['knowledgeId'] ?? 0);
+    $taskId      = (int)($_GET['taskId'] ?? 0);
 
-    if ($taskId <= 0 || empty($_FILES['files'])) {
+    if ($knowledgeId > 0) {
+        $stmt = $pdo->prepare("SELECT * FROM `attachments` WHERE knowledge_id = ? ORDER BY id ASC");
+        $stmt->execute([$knowledgeId]);
+    } else if ($taskId > 0) {
+        $stmt = $pdo->prepare("SELECT * FROM `attachments` WHERE task_id = ? ORDER BY id ASC");
+        $stmt->execute([$taskId]);
+    } else {
         http_response_code(400);
-        echo json_encode(['error' => 'ID da tarefa e arquivos são obrigatórios']);
+        echo json_encode(['error' => 'É necessário informar taskId ou knowledgeId']);
+        exit;
+    }
+
+    $rows = $stmt->fetchAll();
+    $result = array_map(function($row) {
+        return [
+            'id'   => (int)$row['id'],
+            'name' => $row['file_name'],
+            'size' => $row['file_size'],
+            'url'  => $row['file_path']
+        ];
+    }, $rows);
+
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($method === 'POST') {
+    $taskId      = (int)($_POST['taskId'] ?? 0);
+    $knowledgeId = (int)($_POST['knowledgeId'] ?? 0);
+
+    if (($taskId <= 0 && $knowledgeId <= 0) || empty($_FILES['files'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'ID da tarefa ou do artigo e arquivos são obrigatórios']);
         exit;
     }
 
@@ -41,8 +72,14 @@ if ($method === 'POST') {
                     $formattedSize = round($fileSize / pow(1024, $pow), 1) . ' ' . $units[$pow];
                 }
 
-                $stmt = $pdo->prepare("INSERT INTO `attachments` (task_id, file_name, file_path, file_size) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$taskId, $fileName, $publicPath, $formattedSize]);
+                $stmt = $pdo->prepare("INSERT INTO `attachments` (task_id, knowledge_id, file_name, file_path, file_size) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    $taskId > 0 ? $taskId : null,
+                    $knowledgeId > 0 ? $knowledgeId : null,
+                    $fileName,
+                    $publicPath,
+                    $formattedSize
+                ]);
 
                 $attId = (int)$pdo->lastInsertId();
 

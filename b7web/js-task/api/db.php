@@ -7,7 +7,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
@@ -57,7 +57,8 @@ try {
 
         CREATE TABLE IF NOT EXISTS `attachments` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
-            `task_id` INT NOT NULL,
+            `task_id` INT NULL,
+            `knowledge_id` INT NULL,
             `file_name` VARCHAR(255) NOT NULL,
             `file_path` VARCHAR(500) NOT NULL,
             `file_size` VARCHAR(50) NOT NULL,
@@ -107,6 +108,12 @@ try {
     addColumnIfMissing($pdo, 'tasks', 'criticality', "VARCHAR(20) DEFAULT 'normal'");
     addColumnIfMissing($pdo, 'tasks', 'complexity', "VARCHAR(20) DEFAULT 'normal'");
     addColumnIfMissing($pdo, 'tasks', 'priority', "VARCHAR(20) DEFAULT 'normal'");
+    
+    // Migração de attachments para suportar Base de Conhecimento
+    try {
+        $pdo->exec("ALTER TABLE `attachments` MODIFY `task_id` INT NULL");
+    } catch (Exception $e) {}
+    addColumnIfMissing($pdo, 'attachments', 'knowledge_id', "INT NULL");
 
     // 4. Cria as colunas iniciais padrão se estiver vazio
     $stmt = $pdo->query("SELECT COUNT(*) AS total FROM `columns` ");
