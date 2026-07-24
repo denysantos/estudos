@@ -122,6 +122,8 @@ async function loadUsers() {
             const dateStr = u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '-';
             const isSelf = currentUser && currentUser.id === parseInt(u.id, 10);
 
+            const changePassBtn = `<button class="btn-action" style="background: #e3f2fd; color: #1565c0;" onclick="window.Auth.openChangePasswordModal(${u.id}, '${escapeHtml(u.name)}')">🔑 Senha</button>`;
+
             const deleteBtn = isSelf 
                 ? '<span class="text-muted" title="Sessão Atual">(Você)</span>' 
                 : `<button class="btn-action btn-delete-sm" onclick="deleteUser(${u.id}, '${escapeHtml(u.name)}')">🗑️ Excluir</button>`;
@@ -133,7 +135,7 @@ async function loadUsers() {
                     <td><code>${escapeHtml(u.username)}</code></td>
                     <td>${roleBadge}</td>
                     <td>${dateStr}</td>
-                    <td>${deleteBtn}</td>
+                    <td><div style="display: flex; gap: 6px;">${changePassBtn} ${deleteBtn}</div></td>
                 </tr>
             `;
         }).join('');

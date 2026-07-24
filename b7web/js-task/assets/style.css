@@ -1825,5 +1825,50 @@ mark.search-highlight {
 .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 .alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
+/* Alternador de Visualização (Cards x Lista) na Base de Conhecimento */
+.view-toggle-group {
+    display: flex;
+    background: #eef2f5;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 3px;
+}
+
+.view-toggle-btn {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-toggle-btn:hover {
+    color: #1b5e20;
+}
+
+.view-toggle-btn.active {
+    background: #ffffff;
+    color: #1b5e20;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background: #f1f8e9 !important;
+}
+
+.text-primary {
+    color: #1b5e20;
+}
+
+
 
 

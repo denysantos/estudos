@@ -49,11 +49,39 @@ async function loadTasks() {
     }
 }
 
+let currentViewMode = localStorage.getItem('kb_view_mode') || 'cards';
+
+// ── Eventos dos botões de alternância de visão ──
+const btnViewCards = document.getElementById('btn-view-cards');
+const btnViewList = document.getElementById('btn-view-list');
+
+if (btnViewCards && btnViewList) {
+    btnViewCards.classList.toggle('active', currentViewMode === 'cards');
+    btnViewList.classList.toggle('active', currentViewMode === 'list');
+
+    btnViewCards.addEventListener('click', () => {
+        currentViewMode = 'cards';
+        localStorage.setItem('kb_view_mode', 'cards');
+        btnViewCards.classList.add('active');
+        btnViewList.classList.remove('active');
+        renderArticles();
+    });
+
+    btnViewList.addEventListener('click', () => {
+        currentViewMode = 'list';
+        localStorage.setItem('kb_view_mode', 'list');
+        btnViewList.classList.add('active');
+        btnViewCards.classList.remove('active');
+        renderArticles();
+    });
+}
+
 // ── Renderização dos artigos ──
 function renderArticles() {
     articlesGrid.innerHTML = '';
 
     if (articles.length === 0) {
+        articlesGrid.className = 'kb-grid';
         articlesGrid.innerHTML = `
             <div class="kb-empty">
                 <span>📚</span>
@@ -62,56 +90,127 @@ function renderArticles() {
         return;
     }
 
-    articles.forEach(article => {
-        const card = document.createElement('div');
-        card.className = 'kb-article-card';
+    if (currentViewMode === 'cards') {
+        articlesGrid.className = 'kb-grid';
+        articles.forEach(article => {
+            const card = document.createElement('div');
+            card.className = 'kb-article-card';
 
-        const titleEl = document.createElement('div');
-        titleEl.className = 'kb-article-title';
-        titleEl.textContent = article.title;
+            const titleEl = document.createElement('div');
+            titleEl.className = 'kb-article-title';
+            titleEl.textContent = article.title;
 
-        const metaEl = document.createElement('div');
-        metaEl.className = 'kb-article-meta';
-        const parts = [`📅 ${article.createdAt}`];
-        if (article.taskTitle) parts.push(`🔗 #${article.taskId} — ${article.taskTitle}`);
-        metaEl.textContent = parts.join('  ·  ');
+            const metaEl = document.createElement('div');
+            metaEl.className = 'kb-article-meta';
+            const parts = [`📅 ${article.createdAt}`];
+            if (article.taskTitle) parts.push(`🔗 #${article.taskId} — ${article.taskTitle}`);
+            metaEl.textContent = parts.join('  ·  ');
 
-        const previewEl = document.createElement('div');
-        previewEl.className = 'kb-article-preview';
-        previewEl.textContent = article.cause || article.analysis || article.resolution || '(sem detalhes)';
+            const previewEl = document.createElement('div');
+            previewEl.className = 'kb-article-preview';
+            previewEl.textContent = article.cause || article.analysis || article.resolution || '(sem detalhes)';
 
-        const actionsEl = document.createElement('div');
-        actionsEl.className = 'kb-article-actions';
+            const actionsEl = document.createElement('div');
+            actionsEl.className = 'kb-article-actions';
 
-        const viewBtn = document.createElement('button');
-        viewBtn.className = 'btn btn-secondary btn-sm';
-        viewBtn.textContent = '👁';
-        viewBtn.addEventListener('click', (e) => { e.stopPropagation(); openView(article); });
+            const viewBtn = document.createElement('button');
+            viewBtn.className = 'btn btn-secondary btn-sm';
+            viewBtn.textContent = '👁';
+            viewBtn.addEventListener('click', (e) => { e.stopPropagation(); openView(article); });
 
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-primary btn-sm';
-        editBtn.textContent = '✏️';
-        editBtn.addEventListener('click', (e) => { e.stopPropagation(); openEdit(article); });
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-primary btn-sm';
+            editBtn.textContent = '✏️';
+            editBtn.addEventListener('click', (e) => { e.stopPropagation(); openEdit(article); });
 
-        const delBtn = document.createElement('button');
-        delBtn.className = 'btn btn-danger btn-sm';
-        delBtn.textContent = '🗑️';
-        delBtn.title = 'Excluir artigo';
-        delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteArticle(article.id); });
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn btn-danger btn-sm';
+            delBtn.textContent = '🗑️';
+            delBtn.title = 'Excluir artigo';
+            delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteArticle(article.id); });
 
-        actionsEl.appendChild(viewBtn);
-        actionsEl.appendChild(editBtn);
-        actionsEl.appendChild(delBtn);
+            actionsEl.appendChild(viewBtn);
+            actionsEl.appendChild(editBtn);
+            actionsEl.appendChild(delBtn);
 
-        card.appendChild(titleEl);
-        card.appendChild(metaEl);
-        card.appendChild(previewEl);
-        card.appendChild(actionsEl);
+            card.appendChild(titleEl);
+            card.appendChild(metaEl);
+            card.appendChild(previewEl);
+            card.appendChild(actionsEl);
 
-        card.addEventListener('click', () => openView(article));
-        articlesGrid.appendChild(card);
-    });
+            card.addEventListener('click', () => openView(article));
+            articlesGrid.appendChild(card);
+        });
+    } else {
+        // Visualização em Lista / Tabela no formato do comparativo de metas
+        articlesGrid.className = 'kb-list-container';
+        
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'card';
+
+        const tableResponsive = document.createElement('div');
+        tableResponsive.className = 'table-responsive';
+
+        const table = document.createElement('table');
+        table.className = 'admin-table';
+
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título do Artigo</th>
+                    <th>Tarefa Vinculada</th>
+                    <th>Data Criação</th>
+                    <th>Resumo / Prévia</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="kb-table-body"></tbody>
+        `;
+
+        tableResponsive.appendChild(table);
+        cardContainer.appendChild(tableResponsive);
+        articlesGrid.appendChild(cardContainer);
+
+        const tbody = table.querySelector('#kb-table-body');
+        
+        articles.forEach(article => {
+            const tr = document.createElement('tr');
+            tr.className = 'clickable-row';
+
+            const rawPreview = article.cause || article.analysis || article.resolution || '(sem detalhes)';
+            const cleanPreview = rawPreview.replace(/<[^>]*>/g, '').substring(0, 70) + (rawPreview.length > 70 ? '...' : '');
+
+            const taskBadge = article.taskTitle 
+                ? `<span class="badge badge-info">🔗 #${article.taskId} — ${escapeHtml(article.taskTitle)}</span>` 
+                : `<span class="text-muted">—</span>`;
+
+            tr.innerHTML = `
+                <td>#${article.id}</td>
+                <td><strong class="text-primary">${escapeHtml(article.title)}</strong></td>
+                <td>${taskBadge}</td>
+                <td>${article.createdAt || '-'}</td>
+                <td><span class="text-muted">${escapeHtml(cleanPreview)}</span></td>
+                <td>
+                    <div style="display: flex; gap: 6px;" onclick="event.stopPropagation();">
+                        <button class="btn-action" style="background: #e8f5e9; color: #1b5e20;" title="Visualizar Artigo">👁️ Ver</button>
+                        <button class="btn-action" style="background: #e3f2fd; color: #1565c0;" title="Editar Artigo">✏️ Editar</button>
+                        <button class="btn-action btn-delete-sm" title="Excluir Artigo">🗑️ Excluir</button>
+                    </div>
+                </td>
+            `;
+
+            const actionBtns = tr.querySelectorAll('.btn-action');
+            actionBtns[0].addEventListener('click', (e) => { e.stopPropagation(); openView(article); });
+            actionBtns[1].addEventListener('click', (e) => { e.stopPropagation(); openEdit(article); });
+            actionBtns[2].addEventListener('click', (e) => { e.stopPropagation(); deleteArticle(article.id); });
+
+            tr.addEventListener('click', () => openView(article));
+            tbody.appendChild(tr);
+        });
+    }
 }
+
 
 // ── Modal de Visualização ──
 function openView(article) {
