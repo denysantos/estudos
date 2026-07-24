@@ -5,6 +5,8 @@ const API_BASE = 'api';
 let articles = [];
 let tasksList = [];
 let editingId = null;
+let pendingFiles = [];
+let currentModalAttachments = [];
 
 // Elementos fixos da página (existem no HTML)
 const searchKbInput = document.getElementById('kb-search-input');
@@ -76,8 +78,179 @@ if (btnViewCards && btnViewList) {
     });
 }
 
+// ── Utilitários de Anexos ──
+function getFileIcon(filename) {
+    if (!filename) return '📎';
+    const ext = filename.split('.').pop().toLowerCase();
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) return '🖼️';
+    if (['pdf'].includes(ext)) return '📄';
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return '📦';
+    if (['js', 'php', 'css', 'html', 'json', 'sql'].includes(ext)) return '💻';
+    if (['doc', 'docx', 'txt', 'rtf'].includes(ext)) return '📝';
+    return '📎';
+}
+
+function isImageFile(filename) {
+    if (!filename) return false;
+    const ext = filename.split('.').pop().toLowerCase();
+    return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext);
+}
+
+function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const pow = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, pow)).toFixed(1) + ' ' + units[pow];
+}
+
+function renderModalAttachmentsList() {
+    const container = document.getElementById('kb-modal-attachments-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (currentModalAttachments.length === 0 && pendingFiles.length === 0) {
+        container.innerHTML = `<span class="text-muted" style="font-size:0.8rem; font-style:italic;">Nenhum anexo adicionado ainda.</span>`;
+        return;
+    }
+
+    // 1. Anexos já salvos no servidor
+    currentModalAttachments.forEach(att => {
+        const item = document.createElement('div');
+        item.className = 'kb-attachment-item';
+
+        const isImg = isImageFile(att.name);
+        const insertImgBtn = isImg ? `<button type="button" class="kb-btn-insert-img" title="Inserir imagem no editor">🖼️ Inserir no editor</button>` : '';
+
+        item.innerHTML = `
+            <div class="kb-attachment-info">
+                <span class="kb-attachment-icon">${getFileIcon(att.name)}</span>
+                <a href="${escapeAttr(att.url)}" target="_blank" download class="kb-attachment-name" title="Clique para baixar/visualizar">${escapeHtml(att.name)}</a>
+                <span class="kb-attachment-size">(${escapeHtml(att.size)})</span>
+            </div>
+            <div class="kb-attachment-actions">
+                ${insertImgBtn}
+                <button type="button" class="attachment-remove btn-del-att" title="Remover anexo">🗑️</button>
+            </div>
+        `;
+
+        if (isImg) {
+            const btnIns = item.querySelector('.kb-btn-insert-img');
+            btnIns.addEventListener('click', () => insertImageIntoEditor(att.url, att.name));
+        }
+
+        const btnDel = item.querySelector('.btn-del-att');
+        btnDel.addEventListener('click', () => deleteKbAttachment(att.id));
+
+        container.appendChild(item);
+    });
+
+    // 2. Anexos pendentes (para novo artigo)
+    pendingFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'kb-attachment-item';
+        item.style.background = '#fff8e1';
+
+        item.innerHTML = `
+            <div class="kb-attachment-info">
+                <span class="kb-attachment-icon">${getFileIcon(file.name)}</span>
+                <span class="kb-attachment-name" style="color: #b78103;">${escapeHtml(file.name)}</span>
+                <span class="kb-attachment-size">(${formatFileSize(file.size)}) — <em>pendente</em></span>
+            </div>
+            <div class="kb-attachment-actions">
+                <button type="button" class="attachment-remove btn-del-pending" title="Remover da lista">❌</button>
+            </div>
+        `;
+
+        item.querySelector('.btn-del-pending').addEventListener('click', () => {
+            pendingFiles.splice(index, 1);
+            renderModalAttachmentsList();
+        });
+
+        container.appendChild(item);
+    });
+}
+
+function insertImageIntoEditor(url, name) {
+    const resEditor = document.getElementById('rich-resolution') || document.getElementById('rich-analysis') || document.getElementById('rich-cause');
+    if (!resEditor) return;
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = name;
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '6px';
+    img.style.margin = '8px 0';
+    img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+    resEditor.appendChild(img);
+    resEditor.focus();
+}
+
+async function uploadImmediateFiles(knowledgeId, fileList) {
+    const statusEl = document.getElementById('kb-upload-status');
+    if (statusEl) statusEl.textContent = '⏳ Enviando anexo(s)...';
+    const formData = new FormData();
+    formData.append('knowledgeId', knowledgeId);
+    Array.from(fileList).forEach(file => formData.append('files[]', file));
+
+    try {
+        const res = await fetch(`${API_BASE}/attachments.php`, { method: 'POST', body: formData });
+        if (res.ok) {
+            const newAtts = await res.json();
+            currentModalAttachments.push(...newAtts);
+            const article = articles.find(a => a.id === knowledgeId);
+            if (article) {
+                if (!article.attachments) article.attachments = [];
+                article.attachments.push(...newAtts);
+            }
+            renderModalAttachmentsList();
+            renderArticles();
+            if (statusEl) statusEl.textContent = '✅ Anexo(s) enviado(s)!';
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2000);
+        } else {
+            alert('Erro ao enviar anexos.');
+            if (statusEl) statusEl.textContent = '';
+        }
+    } catch (err) {
+        console.error('Erro ao enviar anexo:', err);
+        if (statusEl) statusEl.textContent = '';
+    }
+}
+
+async function deleteKbAttachment(attachmentId) {
+    if (!confirm('Deseja realmente remover este anexo?')) return;
+    try {
+        const res = await fetch(`${API_BASE}/attachments.php?id=${attachmentId}`, { method: 'DELETE' });
+        if (res.ok) {
+            currentModalAttachments = currentModalAttachments.filter(att => att.id !== attachmentId);
+            if (editingId) {
+                const article = articles.find(a => a.id === editingId);
+                if (article && article.attachments) {
+                    article.attachments = article.attachments.filter(att => att.id !== attachmentId);
+                }
+            }
+            renderModalAttachmentsList();
+            renderArticles();
+        }
+    } catch (err) {
+        console.error('Erro ao excluir anexo:', err);
+    }
+}
+
+async function uploadPendingFiles(knowledgeId) {
+    if (pendingFiles.length === 0) return;
+    const formData = new FormData();
+    formData.append('knowledgeId', knowledgeId);
+    pendingFiles.forEach(file => formData.append('files[]', file));
+    try {
+        await fetch(`${API_BASE}/attachments.php`, { method: 'POST', body: formData });
+        pendingFiles = [];
+    } catch (err) {
+        console.error('Erro ao enviar anexos pendentes:', err);
+    }
+}
+
 // ── Renderização dos artigos ──
 function renderArticles() {
+    if (!articlesGrid) return;
     articlesGrid.innerHTML = '';
 
     if (articles.length === 0) {
@@ -104,6 +277,7 @@ function renderArticles() {
             metaEl.className = 'kb-article-meta';
             const parts = [`📅 ${article.createdAt}`];
             if (article.taskTitle) parts.push(`🔗 #${article.taskId} — ${article.taskTitle}`);
+            if (article.attachments && article.attachments.length > 0) parts.push(`📎 ${article.attachments.length} anexo(s)`);
             metaEl.textContent = parts.join('  ·  ');
 
             const previewEl = document.createElement('div');
@@ -142,7 +316,7 @@ function renderArticles() {
             articlesGrid.appendChild(card);
         });
     } else {
-        // Visualização em Lista / Tabela no formato do comparativo de metas
+        // Visualização em Lista / Tabela
         articlesGrid.className = 'kb-list-container';
         
         const cardContainer = document.createElement('div');
@@ -160,6 +334,7 @@ function renderArticles() {
                     <th>ID</th>
                     <th>Título do Artigo</th>
                     <th>Tarefa Vinculada</th>
+                    <th>Anexos</th>
                     <th>Data Criação</th>
                     <th>Resumo / Prévia</th>
                     <th>Ações</th>
@@ -185,10 +360,15 @@ function renderArticles() {
                 ? `<span class="badge badge-info">🔗 #${article.taskId} — ${escapeHtml(article.taskTitle)}</span>` 
                 : `<span class="text-muted">—</span>`;
 
+            const attBadge = (article.attachments && article.attachments.length > 0)
+                ? `<span class="kb-attachment-badge">📎 ${article.attachments.length}</span>`
+                : `<span class="text-muted">—</span>`;
+
             tr.innerHTML = `
                 <td>#${article.id}</td>
                 <td><strong class="text-primary">${escapeHtml(article.title)}</strong></td>
                 <td>${taskBadge}</td>
+                <td>${attBadge}</td>
                 <td>${article.createdAt || '-'}</td>
                 <td><span class="text-muted">${escapeHtml(cleanPreview)}</span></td>
                 <td>
@@ -218,11 +398,27 @@ function openView(article) {
     modalTitleEl.textContent = '📖 ' + article.title;
     btnSave.style.display = 'none';
 
+    const attachmentsListHtml = (article.attachments && article.attachments.length > 0)
+        ? `<div class="kb-attachment-list">` + article.attachments.map(att => `
+            <div class="kb-attachment-item">
+                <div class="kb-attachment-info">
+                    <span class="kb-attachment-icon">${getFileIcon(att.name)}</span>
+                    <a href="${escapeAttr(att.url)}" target="_blank" download class="kb-attachment-name" title="Baixar / Abrir">${escapeHtml(att.name)}</a>
+                    <span class="kb-attachment-size">(${escapeHtml(att.size)})</span>
+                </div>
+                <div class="kb-attachment-actions">
+                    <a href="${escapeAttr(att.url)}" target="_blank" download class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">⬇️ Baixar</a>
+                </div>
+            </div>
+          `).join('') + `</div>`
+        : `<div class="text-muted" style="font-size:0.85rem; font-style:italic;">Nenhum anexo adicionado a este artigo.</div>`;
+
     const sections = [
         { label: 'Tarefa Vinculada', value: article.taskTitle ? `#${article.taskId} — ${article.taskTitle}` : '—', isHtml: false },
         { label: 'Causa do Incidente', value: article.cause || '—', isHtml: true },
         { label: 'Análise', value: article.analysis || '—', isHtml: true },
         { label: 'Resolução', value: article.resolution || '—', isHtml: true },
+        { label: `📎 Anexos (${article.attachments ? article.attachments.length : 0})`, value: attachmentsListHtml, isHtml: true }
     ];
 
     modalBodyEl.innerHTML = sections.map(s => {
@@ -242,6 +438,9 @@ function openView(article) {
 // ── Modal de Edição/Criação ──
 function openEdit(article = null) {
     editingId = article ? article.id : null;
+    pendingFiles = [];
+    currentModalAttachments = article && article.attachments ? [...article.attachments] : [];
+
     modalTitleEl.textContent = article ? '✏️ Editar Artigo' : '✨ Novo Artigo';
     btnSave.style.display = '';
 
@@ -260,7 +459,7 @@ function openEdit(article = null) {
                 ${tasksList.map(t => `
                     <option value="${t.id}"
                         ${article && article.taskId === t.id ? 'selected' : ''}>
-                        #${t.id} — ${escapeHtml(t.text)}
+                        #${t.id} — ${escapeHtml(t.text || t.title)}
                     </option>`).join('')}
             </select>
         </div>
@@ -272,6 +471,19 @@ function openEdit(article = null) {
         </div>
         <div class="form-group" id="group-resolution">
             <label class="form-label">Resolução</label>
+        </div>
+        <div class="form-group" id="group-attachments">
+            <label class="form-label">📎 Anexos do Artigo</label>
+            <div class="kb-attachments-section">
+                <div id="kb-modal-attachments-list" class="kb-attachment-list"></div>
+                <div class="kb-upload-box">
+                    <input type="file" id="kb-file-input" multiple style="display: none;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-add-kb-attachment">
+                        📎 Selecionar Arquivos
+                    </button>
+                    <span id="kb-upload-status" class="kb-upload-status" style="font-size: 0.8rem; color: #666;"></span>
+                </div>
+            </div>
         </div>`;
 
     // Monta os editores ricos após inserir no DOM
@@ -291,86 +503,113 @@ function openEdit(article = null) {
         article ? article.resolution || '' : '',
         'Quais ações foram tomadas para resolver...'));
 
+    // Renderizar lista de anexos e ligar eventos de upload
+    renderModalAttachmentsList();
+
+    const btnAddAttachment = document.getElementById('btn-add-kb-attachment');
+    const fileInput = document.getElementById('kb-file-input');
+
+    if (btnAddAttachment && fileInput) {
+        btnAddAttachment.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (!e.target.files || e.target.files.length === 0) return;
+            if (editingId) {
+                uploadImmediateFiles(editingId, e.target.files);
+            } else {
+                Array.from(e.target.files).forEach(f => pendingFiles.push(f));
+                renderModalAttachmentsList();
+            }
+            fileInput.value = '';
+        });
+    }
+
     openModal();
-    // Foca no campo de título para UX
-    document.getElementById('form-title').focus();
+    const titleInput = document.getElementById('form-title');
+    if (titleInput) titleInput.focus();
 }
 
 function openModal() {
-    modalOverlay.classList.add('active');
+    if (modalOverlay) modalOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
-    modalOverlay.classList.remove('active');
+    if (modalOverlay) modalOverlay.classList.remove('active');
     document.body.style.overflow = '';
 }
 
 // ── Salvar (lê os campos do modal-body injetado) ──
-btnSave.addEventListener('click', async () => {
-    // Lê os campos que foram injetados dinamicamente
-    const titleInput   = document.getElementById('form-title');
-    const taskIdInput  = document.getElementById('form-task-id');
-    const causeEditor      = document.getElementById('rich-cause');
-    const analysisEditor   = document.getElementById('rich-analysis');
-    const resolutionEditor = document.getElementById('rich-resolution');
+if (btnSave) {
+    btnSave.addEventListener('click', async () => {
+        const titleInput   = document.getElementById('form-title');
+        const taskIdInput  = document.getElementById('form-task-id');
+        const causeEditor      = document.getElementById('rich-cause');
+        const analysisEditor   = document.getElementById('rich-analysis');
+        const resolutionEditor = document.getElementById('rich-resolution');
 
-    if (!titleInput) return; // modal de visualização, não de edição
+        if (!titleInput) return;
 
-    const title      = titleInput.value.trim();
-    const cause      = causeEditor      ? causeEditor.innerHTML.trim()      : '';
-    const analysis   = analysisEditor   ? analysisEditor.innerHTML.trim()   : '';
-    const resolution = resolutionEditor ? resolutionEditor.innerHTML.trim() : '';
-    const taskIdVal  = taskIdInput ? taskIdInput.value : '';
-    const taskId     = taskIdVal ? parseInt(taskIdVal) : null;
+        const title      = titleInput.value.trim();
+        const cause      = causeEditor      ? causeEditor.innerHTML.trim()      : '';
+        const analysis   = analysisEditor   ? analysisEditor.innerHTML.trim()   : '';
+        const resolution = resolutionEditor ? resolutionEditor.innerHTML.trim() : '';
+        const taskIdVal  = taskIdInput ? taskIdInput.value : '';
+        const taskId     = taskIdVal ? parseInt(taskIdVal) : null;
 
-    if (!title) {
-        titleInput.style.borderColor = '#c62828';
-        titleInput.focus();
-        return;
-    }
-
-    // Reset visual de erro
-    titleInput.style.borderColor = '';
-
-    const payload = { title, cause, analysis, resolution, taskId };
-
-    // Feedback visual no botão
-    btnSave.disabled = true;
-    btnSave.textContent = '⏳ Salvando...';
-
-    try {
-        let res;
-        if (editingId) {
-            res = await fetch(`${API_BASE}/knowledge.php`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: editingId, ...payload })
-            });
-        } else {
-            res = await fetch(`${API_BASE}/knowledge.php`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+        if (!title) {
+            titleInput.style.borderColor = '#c62828';
+            titleInput.focus();
+            return;
         }
 
-        if (res.ok) {
-            closeModal();
-            await loadArticles(searchKbInput.value.trim());
-        } else {
-            const errData = await res.json().catch(() => ({}));
-            alert('Erro ao salvar: ' + (errData.error || 'Verifique o console.'));
-            console.error('Erro API:', errData);
+        titleInput.style.borderColor = '';
+
+        const payload = { title, cause, analysis, resolution, taskId };
+
+        btnSave.disabled = true;
+        btnSave.textContent = '⏳ Salvando...';
+
+        try {
+            let res;
+            let resData = null;
+
+            if (editingId) {
+                res = await fetch(`${API_BASE}/knowledge.php`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: editingId, ...payload })
+                });
+                if (res.ok) resData = await res.json().catch(() => ({}));
+            } else {
+                res = await fetch(`${API_BASE}/knowledge.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) resData = await res.json().catch(() => ({}));
+            }
+
+            if (res.ok) {
+                const articleId = editingId || (resData ? resData.id : null);
+                if (articleId && pendingFiles.length > 0) {
+                    await uploadPendingFiles(articleId);
+                }
+                closeModal();
+                await loadArticles(searchKbInput ? searchKbInput.value.trim() : '');
+            } else {
+                const errData = resData || await res.json().catch(() => ({}));
+                alert('Erro ao salvar: ' + (errData.error || 'Verifique o console.'));
+                console.error('Erro API:', errData);
+            }
+        } catch (err) {
+            alert('Erro de conexão com a API. Verifique se o XAMPP está rodando.');
+            console.error('Erro ao salvar artigo:', err);
+        } finally {
+            btnSave.disabled = false;
+            btnSave.textContent = '💾 Salvar Artigo';
         }
-    } catch (err) {
-        alert('Erro de conexão com a API. Verifique se o XAMPP está rodando.');
-        console.error('Erro ao salvar artigo:', err);
-    } finally {
-        btnSave.disabled = false;
-        btnSave.textContent = '💾 Salvar Artigo';
-    }
-});
+    });
+}
 
 // ── Excluir ──
 async function deleteArticle(id) {
@@ -378,7 +617,7 @@ async function deleteArticle(id) {
     try {
         const res = await fetch(`${API_BASE}/knowledge.php?id=${id}`, { method: 'DELETE' });
         if (res.ok) {
-            await loadArticles(searchKbInput.value.trim());
+            await loadArticles(searchKbInput ? searchKbInput.value.trim() : '');
         }
     } catch (err) {
         console.error('Erro ao excluir artigo:', err);
@@ -387,19 +626,21 @@ async function deleteArticle(id) {
 
 // ── Busca com debounce ──
 let kbDebounce = null;
-searchKbInput.addEventListener('input', (e) => {
-    clearTimeout(kbDebounce);
-    kbDebounce = setTimeout(() => loadArticles(e.target.value.trim()), 300);
-});
-searchKbInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { searchKbInput.value = ''; loadArticles(); }
-});
+if (searchKbInput) {
+    searchKbInput.addEventListener('input', (e) => {
+        clearTimeout(kbDebounce);
+        kbDebounce = setTimeout(() => loadArticles(e.target.value.trim()), 300);
+    });
+    searchKbInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { searchKbInput.value = ''; loadArticles(); }
+    });
+}
 
 // ── Eventos do modal ──
-btnNew.addEventListener('click', () => openEdit());
-btnCancel.addEventListener('click', closeModal);
-modalClose.addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+if (btnNew) btnNew.addEventListener('click', () => openEdit());
+if (btnCancel) btnCancel.addEventListener('click', closeModal);
+if (modalClose) modalClose.addEventListener('click', closeModal);
+if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
 // ── Utilitários de escape ──
@@ -427,7 +668,6 @@ function createRichEditor(editorId, initialHtml, placeholder) {
     const toolbar = document.createElement('div');
     toolbar.className = 'rich-toolbar';
 
-    // Salva a seleção antes de o botão roubar o foco
     let savedSelection = null;
     function saveSelection() {
         const sel = window.getSelection();
@@ -446,7 +686,7 @@ function createRichEditor(editorId, initialHtml, placeholder) {
         { label: 'B',  title: 'Negrito',              cmd: () => execCmd('bold'),   style: 'font-weight:700;' },
         { label: 'I',  title: 'Itálico',              cmd: () => execCmd('italic'), style: 'font-style:italic;' },
         { label: 'U',  title: 'Sublinhado',            cmd: () => execCmd('underline'), style: 'text-decoration:underline;' },
-        null,  // separador
+        null,
         { label: '`code`',     title: 'Código inline',   cmd: insertInlineCode, extra: 'code-btn' },
         { label: '\u25a4 Bloco', title: 'Bloco de código', cmd: insertCodeBlock,  extra: 'code-btn' },
     ];
@@ -468,7 +708,6 @@ function createRichEditor(editorId, initialHtml, placeholder) {
             const range = sel.getRangeAt(0);
             range.deleteContents();
             range.insertNode(code);
-            // Coloca o cursor após o elemento
             range.setStartAfter(code);
             range.collapse(true);
             sel.removeAllRanges();
@@ -524,7 +763,7 @@ function createRichEditor(editorId, initialHtml, placeholder) {
         btn.title = tool.title;
         if (tool.style) btn.setAttribute('style', tool.style);
         btn.addEventListener('mousedown', (e) => {
-            e.preventDefault(); // não perde o foco do editor
+            e.preventDefault();
             saveSelection();
             tool.cmd();
         });
@@ -532,7 +771,6 @@ function createRichEditor(editorId, initialHtml, placeholder) {
         toolBtns.push(btn);
     });
 
-    // ── Área editável ──
     const content = document.createElement('div');
     content.className = 'rich-content';
     content.contentEditable = 'true';
