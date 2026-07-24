@@ -97,5 +97,54 @@ if ($method === 'DELETE') {
     exit;
 }
 
+// PUT api/users.php - Alterar Senha do Usuário
+if ($method === 'PUT') {
+    if (!isset($_SESSION['user'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Usuário não autenticado.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $targetUserId = (int)($data['id'] ?? $_SESSION['user']['id']);
+    $newPassword = trim($data['password'] ?? $data['newPassword'] ?? '');
+    $currentPassword = trim($data['currentPassword'] ?? '');
+
+    if (empty($newPassword)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'A nova senha não pode ser vazia.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $isAdmin = $_SESSION['user']['role'] === 'admin';
+    $isSelf = (int)$_SESSION['user']['id'] === $targetUserId;
+
+    if (!$isAdmin && !$isSelf) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Você não tem permissão para alterar a senha deste usuário.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // Se for o próprio usuário (e não for um admin redefinindo a senha de outro), validar a senha atual se fornecida
+    if ($isSelf && !$isAdmin && !empty($currentPassword)) {
+        $stmtUser = $pdo->prepare("SELECT password FROM `users` WHERE id = ?");
+        $stmtUser->execute([$targetUserId]);
+        $uData = $stmtUser->fetch();
+        if (!$uData || !password_verify($currentPassword, $uData['password'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'A senha atual informada está incorreta.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
+    $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("UPDATE `users` SET password = ? WHERE id = ?");
+    $stmt->execute([$newHash, $targetUserId]);
+
+    echo json_encode(['success' => true, 'message' => 'Senha alterada com sucesso!'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 http_response_code(405);
 echo json_encode(['error' => 'Método não permitido.'], JSON_UNESCAPED_UNICODE);
+
