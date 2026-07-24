@@ -395,6 +395,15 @@ function createTaskCard(task, query = '') {
     badgesRow.appendChild(crBadge);
     badgesRow.appendChild(prBadge);
 
+    if (task.maxSlaHours) {
+        const slaBadge = document.createElement('span');
+        const isMet = !!task.isWithinSla;
+        slaBadge.className = `badge ${isMet ? 'badge-sla-ok' : 'badge-sla-breached'}`;
+        slaBadge.textContent = isMet ? `🟢 SLA ${task.elapsedHours}h/${task.maxSlaHours}h` : `🔴 SLA ${task.elapsedHours}h/${task.maxSlaHours}h`;
+        slaBadge.title = isMet ? `Resolução dentro da meta estipulada (${task.maxSlaHours}h)` : `Resolução excedeu a meta estipulada (${task.maxSlaHours}h)`;
+        badgesRow.appendChild(slaBadge);
+    }
+
     // ── Área expandida ──
     const expandable = document.createElement('div');
     expandable.className = 'task-card-expandable';
@@ -943,7 +952,9 @@ function openTaskModal(task) {
     [
         { label: 'Criada em', value: task.createdAt || '-' },
         { label: 'Concluída em', value: task.completedAt || '-' },
-        { label: 'Duração', value: task.duration || '-' }
+        { label: 'Duração', value: task.duration || '-' },
+        { label: 'Meta SLA', value: task.maxSlaHours ? `${task.maxSlaHours}h (${(task.criticality || 'normal').toUpperCase()})` : '-' },
+        { label: 'Status da Meta', value: task.isWithinSla ? '🟢 Dentro da Meta' : '🔴 SLA Estourado' }
     ].forEach(({ label, value }) => {
         const item = document.createElement('div');
         item.className = 'task-modal-meta-item';

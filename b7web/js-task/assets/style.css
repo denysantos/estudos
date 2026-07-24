@@ -1401,4 +1401,429 @@ mark.search-highlight {
     font-size: inherit;
 }
 
+/* ============================================================
+   ESTILOS DE AUTENTICAÇÃO, LOGIN E PERFIL DO CABEÇALHO
+   ============================================================ */
+.login-body {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #43a047 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 36px 32px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-logo-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.login-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1b5e20;
+    margin-bottom: 6px;
+}
+
+.login-header p {
+    font-size: 0.88rem;
+    color: #666;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+    background: #fff;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+    justify-content: center;
+}
+
+.login-error-msg {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.login-default-credentials {
+    margin-top: 28px;
+    padding: 14px 16px;
+    background: #f1f8e9;
+    border: 1px solid #c8e6c9;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    color: #2e7d32;
+}
+
+.credentials-badge-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.login-default-credentials code {
+    background: #e8f5e9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.credentials-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.76rem;
+    color: #555;
+    font-style: italic;
+}
+
+/* Usuário no Cabeçalho */
+.user-header-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 10px;
+    padding-left: 14px;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.user-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.user-role-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.user-role-tag.admin {
+    background: #ffd54f;
+    color: #5d4037;
+}
+
+.user-role-tag.user {
+    background: #bbdefb;
+    color: #0d47a1;
+}
+
+.btn-logout {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-logout:hover {
+    background: #c62828;
+}
+
+/* ============================================================
+   ESTILOS DO PAINEL DE ADMINISTRAÇÃO E METAS / SLA
+   ============================================================ */
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 2px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #666;
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: #1b5e20;
+    background: #e8f5e9;
+}
+
+.tab-btn.active {
+    color: #1b5e20;
+    border-bottom: 3px solid #2e7d32;
+    background: #ffffff;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.admin-grid-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .admin-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1b5e20;
+    margin-bottom: 16px;
+}
+
+.section-subtitle {
+    font-size: 0.88rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.max-width-800 { max-width: 800px; }
+.center-block { margin: 0 auto; }
+.mt-20 { margin-top: 20px; }
+.mb-20 { margin-bottom: 20px; }
+
+/* Configuração de Metas SLA */
+.sla-input-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.sla-input-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.crit-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.crit-alta { background: #ffebee; color: #c62828; }
+.crit-normal { background: #e3f2fd; color: #1565c0; }
+.crit-baixa { background: #e8f5e9; color: #1b5e20; }
+
+.crit-desc {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.sla-hours-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sla-hours-input-wrapper input {
+    width: 90px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.sla-hours-input-wrapper .unit {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+/* Tabelas de Administração */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    text-align: left;
+}
+
+.admin-table th {
+    background: #f4f6f8;
+    color: #444;
+    font-weight: 700;
+    padding: 12px 14px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.admin-table tr:hover {
+    background: #f9fbf9;
+}
+
+.text-center { text-align: center; }
+.text-danger { color: #c62828; }
+.text-muted { color: #888; font-size: 0.8rem; }
+
+.btn-action {
+    background: transparent;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.btn-delete-sm {
+    color: #c62828;
+    background: #ffebee;
+}
+
+.btn-delete-sm:hover {
+    background: #ffcdd2;
+}
+
+.badge-admin { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+.badge-user { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+
+/* Status de SLA e Badges */
+.badge-sla-ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 12px;
+}
+
+.badge-sla-breached {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 12px;
+}
+
+.badge-success { background: #e8f5e9; color: #2e7d32; }
+.badge-danger  { background: #ffebee; color: #c62828; }
+.badge-warning { background: #fff3e0; color: #ef6c00; }
+.badge-info    { background: #e3f2fd; color: #1565c0; }
+
+.metric-success { border-left: 4px solid #2e7d32; }
+.metric-danger  { border-left: 4px solid #c62828; }
+.metric-rate    { border-left: 4px solid #1565c0; }
+
+.alert-box {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+}
+
+.alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+.alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+
 
